@@ -3,7 +3,7 @@ const path         = require('path');
 const zlib         = require('zlib');
 const Logger       = require('./Logger');
 
-const MAGIC = Buffer.from([0x52, 0x54, 0x01, 0x00]);
+const MAGIC = Buffer.from(process.env.STORE_MAGIC, 'hex');
 
 module.exports = class Store {
     constructor() {
