@@ -61,6 +61,6 @@ module.exports = class IpcHandler {
             this.sendUpdate();
         });
 
-        ipcMain.handle('player:fetch', (_e, username) => this.#fetchPlayer(username));
+        ipcMain.handle('player:fetch', (_e, username) => this.#fetchPlayer(username).catch(() => null));
     };
 };
