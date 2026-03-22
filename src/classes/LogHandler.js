@@ -92,6 +92,8 @@ module.exports = class LogHandler extends EventEmitter {
             {
                 regex: /Connexion au hub/u,
                 run: async () => {
+                    if (this.game.mode && !this.game.lobby) return;
+                    
                     await this.reset();
                 }
             },
