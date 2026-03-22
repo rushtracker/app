@@ -1,0 +1,48 @@
+{
+  "name": "rush-tracker",
+  "version": "1.2.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "chcp 65001 > nul && electron .",
+    "build": "electron-builder"
+  },
+  "build": {
+    "appId": "com.disbot-development.rush-tracker",
+    "productName": "rush tracker",
+    "forceCodeSigning": false,
+    "win": {
+      "target": "portable",
+      "icon": "app.ico",
+      "signtoolOptions": {
+        "certificateSubjectName": "Disbot Development"
+      }
+    },
+    "extraResources": [
+      {
+        "from": "app.ico",
+        "to": "app.ico"
+      },
+      {
+        "from": ".env",
+        "to": ".env"
+      }
+    ],
+    "files": [
+      "main.js",
+      "preload.js",
+      "src/**",
+      "renderer/**"
+    ]
+  },
+  "author": "djaaana",
+  "license": "GPL 3.0",
+  "description": "minecraft rush statistics tracker",
+  "devDependencies": {
+    "electron": "^41.0.3",
+    "electron-builder": "^26.8.1"
+  },
+  "dependencies": {
+    "colors": "^1.4.0",
+    "dotenv": "^17.3.1"
+  }
+}

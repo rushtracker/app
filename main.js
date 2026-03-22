@@ -1,0 +1,126 @@
+const { app, BrowserWindow, Tray, Menu, nativeImage, Notification } = require('electron');
+const { join }                                                      = require('path');
+
+require('dotenv').config({
+    path: app.isPackaged ? join(process.resourcesPath, '.env') : join(__dirname, '.env'),
+    quiet: true
+});
+
+const LogWatcher  = require('./src/classes/LogWatcher');
+const LogHandler  = require('./src/classes/LogHandler');
+const Store       = require('./src/classes/Store');
+const IpcHandler  = require('./src/classes/IpcHandler');
+
+const store    = new Store();
+const iconPath = app.isPackaged ? join(process.resourcesPath, 'app.ico') : join(__dirname, 'app.ico');
+const gotLock  = app.requestSingleInstanceLock();
+
+if (!gotLock) return app.quit();
+
+let mainWindow;
+let tray;
+let handler;
+let quit;
+let notif;
+
+function sendUpdate() {
+    mainWindow?.webContents.send('game:update', {
+        game:  handler.game,
+        self:  handler.self,
+        games: store.read(),
+    });
+};
+
+function createTray() {
+    const img = nativeImage.createFromPath(iconPath);
+
+    tray = new Tray(img.isEmpty() ? nativeImage.createEmpty() : img);
+    tray.setToolTip('rush tracker');
+
+    const menu = Menu.buildFromTemplate([{ label: 'quitter', click: () => {
+        quit = true;
+        app.quit();
+    }}]);
+
+    tray.setContextMenu(menu);
+
+    tray.on('click', () => {
+        mainWindow?.show();
+        mainWindow?.focus();
+    });
+};
+
+function createWindow() {
+    mainWindow = new BrowserWindow({
+        width: 820, height: 520,
+        minWidth: 680, minHeight: 400,
+        frame: false,
+        transparent: false,
+        backgroundColor: '#1a1a1a',
+        icon: iconPath,
+        webPreferences: {
+            preload: join(__dirname, 'preload.js'),
+            contextIsolation: true,
+            nodeIntegration: false,
+        }
+    });
+
+    mainWindow.loadFile(join(__dirname, 'src', 'renderer', 'index.html'));
+    mainWindow.webContents.once('did-finish-load', sendUpdate);
+
+    mainWindow.on('close', (e) => {
+        if (quit) return;
+
+        e.preventDefault();
+        mainWindow.hide();
+
+        if (!notif) {
+            notif = true;
+
+            new Notification({
+                title: 'rush tracker',
+                body:  'le logiciel tourne toujours en arrière-plan',
+                icon:  iconPath,
+            }).show();
+        };
+    });
+
+    mainWindow.webContents.on('before-input-event', (e, input) => {
+        if (input.key === 'F12' || (input.control && input.shift && input.key === 'I')) e.preventDefault();
+    });
+
+    mainWindow.webContents.on('devtools-opened', () => {
+        mainWindow.webContents.closeDevTools();
+    });
+};
+
+app.whenReady().then(() => {
+    handler = new LogHandler(store);
+
+    createWindow();
+    createTray();
+
+    const watcher = new LogWatcher(join(process.env.APPDATA, process.env.LOG_SUBPATH));
+
+    watcher.on('logUpdate', async (logs) => {
+        for (const log of logs) {
+            await handler.parse(log);
+        };
+
+        sendUpdate();
+    });
+
+    handler.on('gameSaved', sendUpdate);
+    watcher.start();
+
+    new IpcHandler(() => mainWindow, handler, sendUpdate, store);
+
+    app.on('second-instance', () => {
+        mainWindow?.show();
+        mainWindow?.focus();
+    });
+
+    app.on('before-quit', () => watcher.stop());
+});
+
+app.on('window-all-closed', () => {});

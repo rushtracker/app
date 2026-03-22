@@ -1,0 +1,12 @@
+const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('api', {
+    onGameUpdate:  (callback) => ipcRenderer.on('game:update', (_e, data) => callback(data)),
+    getVersion:    () => ipcRenderer.invoke('app:version'),
+    openExternal:  (url) => ipcRenderer.send('shell:openExternal', url),
+    stopGame:      () => ipcRenderer.send('game:stop'),
+    deleteGame:    (id) => ipcRenderer.send('game:delete', id),
+    minimize:      () => ipcRenderer.send('window:minimize'),
+    close:         () => ipcRenderer.send('window:close'),
+    fetchPlayer:   (username) => ipcRenderer.invoke('player:fetch', username)
+});
