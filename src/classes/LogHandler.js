@@ -2,15 +2,16 @@ const EventEmitter = require('events');
 const Logger       = require('./Logger');
 
 const TEAMS     = { bleu: 'blue', blue: 'blue', rouge: 'red', red: 'red' };
-const STATES    = { victoire: true, défaite: false };
+const STATES    = { victoire: 'win', défaite: 'loose', égalité: 'draw' };
 const CHAT_FLAG = '✴';
 const TEAM_LIST = [...new Set(Object.values(TEAMS))];
 
 const GAMEMODES = [
-    { name: '1v1', label: '1v1 [FAST]', total: 2  },
-    { name: '2v2', label: '2v2 [FAST]', total: 4  },
-    { name: '4v4', label: '4v4 [FAST]', total: 8  },
-    { name: '5v5', label: '5v5 [MDT]',  total: 10 },
+    { name: '1v1',       label: '1v1 [FAST]', total: 2  },
+    { name: '2v2',       label: '2v2 [FAST]', total: 4  },
+    { name: '4v4',       label: '4v4 [FAST]', total: 8  },
+    { name: '5v5',       label: '5v5 [MDT]',  total: 10 },
+    { name: 'spectator', label: 'Spectateur'            }
 ];
 
 module.exports = class LogHandler extends EventEmitter {
@@ -21,7 +22,6 @@ module.exports = class LogHandler extends EventEmitter {
         this.store   = store;
         this.game    = this.#defaultGame();
         this.self    = null;
-        this.pending = null;
 
         this.patterns = [
             {
@@ -31,35 +31,51 @@ module.exports = class LogHandler extends EventEmitter {
                 }
             },
             {
+                regex: /Vous regardez maintenant (\w+)/u,
+                run: async ([, username]) => {
+                    await this.reset();
+ 
+                    this.game.spectator = true;
+                    
+                    await this.startGame();
+                    await this.setGameMode('spectator');
+                    await this.fixPlayer(username);
+ 
+                    this.logger.log(`spectateur: ${username}`);
+                }
+            },
+            {
                 regex: /Hide downloading terrain/u,
                 run: async () => {
                     if (!this.game.mode) return;
+ 
+                    if (this.game.spectator) return await this.reset();
 
                     if (!this.game.lobby) await this.setLobby(true);
                     if (this.game.winner) await this.reset();
 
-                    this.pending = true;
+                    await this.#setPending(true);
                 }
             },
             {
                 regex: /\[Rush\] (?:\+ )?(\w+) s'est (re)?connecté/u,
                 run: async ([, username]) => {
-                    if (!this.game.lobby) return;
+                    if (!this.game.lobby && !this.game.spectator) return;
 
                     if (!this.game.started && this.pending) await this.setSelf(username);
-                    if (this.game.started) return await this.setConnected(username);
+                    if (this.game.started || this.game.spectator) return await this.setConnected(username);
 
                     await this.fixPlayer(username);
 
-                    this.pending = null;
+                    await this.#clearPending();
                 }
             },
             {
                 regex: /\[Rush\] (?:- )?(\w+) s'est déconnecté/u,
                 run: async ([, username]) => {
-                    if (!this.game.lobby) return;
+                    if (!this.game.lobby && !this.game.spectator) return;
 
-                    if (this.game.started) {
+                    if (this.game.started || this.game.spectator) {
                         await this.addDeath(username);
                         await this.setDisconnected(username, true);
 
@@ -78,7 +94,7 @@ module.exports = class LogHandler extends EventEmitter {
             {
                 regex: /Vous avez quitté la file d'attente/u,
                 run: async () => {
-                    await this.removeGameMode();
+                    await this.reset();
                 }
             },
             {
@@ -92,7 +108,7 @@ module.exports = class LogHandler extends EventEmitter {
             {
                 regex: /Connexion au hub/u,
                 run: async () => {
-                    if (this.game.mode && !this.game.lobby) return;
+                    if (this.game.mode && !this.game.lobby && !this.game.spectator) return;
                     
                     await this.reset();
                 }
@@ -131,7 +147,7 @@ module.exports = class LogHandler extends EventEmitter {
                 run: async ([, breaker]) => {
                     if (!this.game.started) return;
                     
-                    this.pending = breaker;
+                    await this.#setPending(breaker);
                 }
             },
             {
@@ -141,7 +157,7 @@ module.exports = class LogHandler extends EventEmitter {
 
                     await this.setTeam(this.pending, team);
 
-                    this.pending = null;
+                    await this.#clearPending();
                 }
             },
             {
@@ -149,9 +165,7 @@ module.exports = class LogHandler extends EventEmitter {
                 run: async ([, team, username]) => {
                     if (!this.game.started) return;
 
-                    const destroyedTeam = TEAMS[team.toLowerCase()];
-
-                    await this.setTeam(username, TEAM_LIST.find((t) => t !== destroyedTeam));
+                    await this.setTeam(username, TEAM_LIST.find((t) => t !== TEAMS[team.toLowerCase()]));
                     await this.setBreaker(username);
                 }
             },
@@ -160,7 +174,15 @@ module.exports = class LogHandler extends EventEmitter {
                 run: async ([, state]) => {
                     if (!this.game.started) return;
 
-                    await this.setWin(state);
+                    await this.setState(state);
+                }
+            },
+            {
+                regex: /Résultat » (ÉGALITÉ)/u,
+                run: async ([, state]) => {
+                    if (!this.game.started) return;
+
+                    await this.setState(state);
                 }
             },
             {
@@ -185,13 +207,14 @@ module.exports = class LogHandler extends EventEmitter {
 
     #defaultGame() {
         return {
-            mode:    null,
-            lobby:   false,
-            started: false,
-            players: [],
-            duration: null,
-            win:     null,
-            winner:  null
+            mode:      null,
+            lobby:     false,
+            started:   false,
+            spectator: false,
+            players:   [],
+            duration:  null,
+            state:       null,
+            winner:    null
         };
     };
 
@@ -201,12 +224,6 @@ module.exports = class LogHandler extends EventEmitter {
         this.logger.log(`mode: ${this.game.mode.label}`);
 
         return this.game.mode;
-    };
-
-    async removeGameMode() {
-        this.game.mode = null;
-
-        this.logger.log('mode retiré');
     };
 
     async setLobby(value) {
@@ -223,12 +240,12 @@ module.exports = class LogHandler extends EventEmitter {
         this.logger.log('partie démarrée');
     };
 
-    async setWin(state) {
-        this.game.win = STATES[state.toLowerCase()] ?? null;
+    async setState(state) {
+        this.game.state = STATES[state.toLowerCase()] ?? null;
 
         this.logger.log(`résultat: ${state.toLowerCase()}`);
 
-        return this.game.win;
+        return this.game.state;
     };
 
     async setWinner(team) {
@@ -258,7 +275,7 @@ module.exports = class LogHandler extends EventEmitter {
 
     async fixPlayer(username) {
         let player = this.#findPlayer(username);
-
+ 
         if (!player) {
             player = {
                 username,
@@ -266,17 +283,17 @@ module.exports = class LogHandler extends EventEmitter {
                 kills:     0,
                 deaths:    0,
                 self:      this.self === username,
-                breaker: false,
-                connected: true
+                breaker:   false,
+                connection: true
             };
-
+ 
             this.game.players.push(player);
-
+ 
             this.logger.log(`joueur ajouté: ${username}`);
         };
-
+ 
         await this.fixTeams();
-
+ 
         return player;
     };
 
@@ -301,7 +318,7 @@ module.exports = class LogHandler extends EventEmitter {
     async setConnected(username) {
         const player = await this.fixPlayer(username);
 
-        player.connected = true;
+        player.connection = true;
 
         this.logger.log(`reconnecté: ${username}`);
 
@@ -311,7 +328,7 @@ module.exports = class LogHandler extends EventEmitter {
     async setDisconnected(username) {
         const player = await this.fixPlayer(username);
 
-        player.connected = false;
+        player.connection = false;
 
         this.logger.log(`déconnecté: ${username}`);
 
@@ -334,15 +351,15 @@ module.exports = class LogHandler extends EventEmitter {
     };
 
     async fixTeams() {
-        if (!this.game.mode) return;
-
+        if (!this.game.mode || !this.game.mode.total) return;
+ 
         const teamSize = this.game.mode.total / 2;
         const fullTeam = TEAM_LIST.find((team) => this.game.players.filter((p) => p.team === team).length === teamSize);
-
+ 
         if (!fullTeam) return;
-
+ 
         const otherTeam = TEAM_LIST.find((t) => t !== fullTeam);
-
+ 
         for (const player of this.game.players) {
             if (!player.team) player.team = otherTeam;
         };
@@ -374,8 +391,16 @@ module.exports = class LogHandler extends EventEmitter {
         const self = this.#findPlayer(this.self);
         if (!self || self.team) return;
 
-        const team = this.game.win ? this.game.winner : TEAM_LIST.find((t) => t !== this.game.winner);
+        const team = this.game.win === STATES.victoire ? this.game.winner : TEAM_LIST.find((t) => t !== this.game.winner);
         await this.setTeam(self.username, team);
+    };
+
+    async #setPending(value) {
+        this.pending = value;
+    };
+
+    async #clearPending() {
+        delete this.pending;
     };
 
     async reset() {
@@ -388,22 +413,23 @@ module.exports = class LogHandler extends EventEmitter {
 
     async save() {
         const entry = {
-            id:       Date.now(),
-            mode:     this.game.mode,
-            win:      this.game.win,
-            winner:   this.game.winner,
-            duration: this.game.duration,
-            players:  this.game.players,
+            id:        Date.now(),
+            mode:      this.game.mode,
+            state:       this.game.state,
+            winner:    this.game.winner,
+            duration:  this.game.duration,
+            players:   this.game.players,
+            spectator: this.game.spectator,
         };
-
+ 
         const games = this.store.read();
         games.unshift(entry);
         this.store.write(games);
-
+ 
         this.logger.log(`partie sauvegardée (id: ${entry.id})`);
-
+ 
         this.emit('gameSaved', entry);
-
+ 
         return entry;
     };
 

@@ -38,9 +38,33 @@ export default class History {
         };
 
         for (const g of games) {
-            const resultLabel = g.win === true ? 'victoire' : g.win === false ? 'défaite' : 'inconnu';
-            const resultClass = g.win === true ? 'green'    : g.win === false ? 'red'     : 'muted';
-            const modeLabel   = g.mode?.label || g.modeLabel || g.mode?.name || '—';
+            const modeLabel = g.mode?.label || '—';
+            
+            let resultLabel;
+            let resultClass;
+
+            if (g.spectator) {
+                const resultLabels = {
+                    blue: 'bleu',
+                    red: 'rouge'
+                };
+
+                resultLabel = resultLabels[g.winner] || '—';
+                resultClass = g.winner               || 'muted';
+            } else {
+                const resultLabels = {
+                    win: 'victoire',
+                    loose: 'défaite',
+                    draw: 'égalité'
+                };
+                const resultClasses = {
+                    win: 'green',
+                    loose: 'red'
+                };
+
+                resultLabel = resultLabels[g.state]  || 'inconnu';
+                resultClass = resultClasses[g.state] || 'muted';
+            };
 
             html += `
                 <div class="card ${viewingGameId === g.id ? 'selected' : ''}" data-id="${g.id}">

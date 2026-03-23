@@ -63,6 +63,7 @@
 
 .card-sub       { font-size: 11px; color: var(--text-dim); }
 .card-sub.green { color: #6bcb77; }
+.card-sub.blue { color: #6b85cb; }
 .card-sub.red   { color: #e05a5a; }
 .card-sub.muted { color: var(--text-muted); }
 .card-time      { font-size: 11px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
