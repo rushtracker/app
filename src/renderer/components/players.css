@@ -3,11 +3,6 @@
     to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes row-exit {
-    from { opacity: 1; transform: translateY(0); }
-    to   { opacity: 0; transform: translateY(-5px); }
-}
-
 .row {
     height: 36px;
     border-bottom: 1px solid var(--border);
@@ -23,7 +18,6 @@
 .row.disconnected  { opacity: 0.35; }
 
 .row-enter { animation: row-enter 200ms ease both; }
-.row-exit  { animation: row-exit  150ms ease both; pointer-events: none; }
 
 .empty-state { animation: row-enter 200ms ease both; }
 
