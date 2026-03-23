@@ -2,8 +2,8 @@ import { kd } from './utils.js';
 
 export default class Players {
     #el;
-    #rows = new Map();
-    #gen  = 0;
+    #rows       = new Map();
+    #lastGameId = null;
 
     constructor(onPlayerClick) {
         this.#el = document.getElementById('player-rows');
@@ -26,7 +26,7 @@ export default class Players {
 
             const kdd = this.#kdVal(b) - this.#kdVal(a);
             if (kdd !== 0) return kdd;
-            
+
             return a.username.localeCompare(b.username);
         });
     };
@@ -58,71 +58,58 @@ export default class Players {
             </div>
         `;
 
-        return el;
+        return {
+            el,
+            name: el.querySelector('.player-name'),
+            k:    el.querySelector('.stat-k'),
+            d:    el.querySelector('.stat-d'),
+            kd:   el.querySelector('.stat-kd'),
+        };
     };
 
-    #updateRow(el, p, isBest) {
-        el.className = `row${p.connection === false ? ' disconnected' : ''}`;
+    #updateRow(entry, p, isBest) {
+        entry.el.className = `row${p.connection === false ? ' disconnected' : ''}`;
 
         const crown   = isBest && p.kills > 0 ? ' <span class="crown">👑</span>' : '';
         const breaker = p.breaker ? ' <span class="breaker">💥</span>' : '';
-        const nameEl  = el.querySelector('.player-name');
 
-        nameEl.className = `player-name ${p.team || 'none'}`;
-        nameEl.innerHTML = `${p.username}${crown}${breaker}`;
+        entry.name.className = `player-name ${p.team || 'none'}`;
+        entry.name.innerHTML = `${p.username}${crown}${breaker}`;
 
-        el.querySelector('.stat-k').textContent  = p.kills;
-        el.querySelector('.stat-d').textContent  = p.deaths;
-        el.querySelector('.stat-kd').textContent = kd(p.kills, p.deaths);
-    };
-
-    #exitRow(el, cb) {
-        el.classList.remove('row-enter');
-        el.classList.add('row-exit');
-        el.addEventListener('animationend', cb, { once: true });
+        entry.k.textContent  = p.kills;
+        entry.d.textContent  = p.deaths;
+        entry.kd.textContent = kd(p.kills, p.deaths);
     };
 
     #showEmpty() {
         if (this.#el.querySelector('.empty-state')) return;
         const el = document.createElement('div');
 
-        el.className = 'empty-state';
+        el.className   = 'empty-state';
         el.textContent = 'en attente des joueurs...';
 
         this.#el.appendChild(el);
     };
 
-    render(players, self, skipExit = false) {
-        const gen = ++this.#gen;
+    #clear() {
+        this.#el.innerHTML = '';
+        this.#rows.clear();
+    };
+
+    render(players, self, isStatic = false, gameId = null) {
+        if (isStatic) {
+            if (gameId === this.#lastGameId) return;
+            this.#lastGameId = gameId;
+        } else {
+            this.#lastGameId = null;
+        };
 
         if (!players?.length) {
-            if (skipExit) {
-                this.#el.innerHTML = '';
-                this.#rows.clear();
+            if (!this.#el.querySelector('.empty-state')) {
+                this.#clear();
                 this.#showEmpty();
-
-                return;
             };
 
-            if (!this.#rows.size) {
-                this.#showEmpty();
-
-                return;
-            };
-
-            const snapshot = [...this.#rows];
-            this.#rows.clear();
-
-            let pending = snapshot.length;
-
-            for (const [, el] of snapshot) {
-                this.#exitRow(el, () => {
-                    el.remove();
-
-                    if (gen !== this.#gen) return;
-                    if (--pending === 0) this.#showEmpty();
-                });
-            };
             return;
         };
 
@@ -131,14 +118,13 @@ export default class Players {
 
         this.#el.querySelector('.empty-state')?.remove();
 
-        if (skipExit) {
-            this.#el.innerHTML = '';
-            this.#rows.clear();
+        if (isStatic) {
+            this.#clear();
 
             sorted.forEach((p, i) => {
-                const el = this.#makeRow(p, self, p.username === bestP.username, i * 25);
-                this.#el.appendChild(el);
-                this.#rows.set(p.username, el);
+                const entry = this.#makeRow(p, self, p.username === bestP.username, i * 25);
+                this.#el.appendChild(entry.el);
+                this.#rows.set(p.username, entry);
             });
 
             return;
@@ -146,23 +132,23 @@ export default class Players {
 
         const incoming = new Set(sorted.map((p) => p.username));
 
-        for (const [username, el] of [...this.#rows]) {
+        for (const [username, entry] of [...this.#rows]) {
             if (!incoming.has(username)) {
                 this.#rows.delete(username);
-                this.#exitRow(el, () => el.remove());
+                entry.el.remove();
             };
         };
 
-        sorted.forEach((p) => {
+        sorted.forEach((p, i) => {
             const isBest = p.username === bestP.username;
-            
+
             if (this.#rows.has(p.username)) {
                 this.#updateRow(this.#rows.get(p.username), p, isBest);
             } else {
-                const el = this.#makeRow(p, self, isBest);
+                const entry = this.#makeRow(p, self, isBest, i * 25);
 
-                this.#el.appendChild(el);
-                this.#rows.set(p.username, el);
+                this.#el.appendChild(entry.el);
+                this.#rows.set(p.username, entry);
             };
         });
     };
