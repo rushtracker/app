@@ -48,11 +48,9 @@ module.exports = class LogHandler extends EventEmitter {
                 regex: /Hide downloading terrain/u,
                 run: async () => {
                     if (!this.game.mode) return;
- 
-                    if (this.game.spectator) return await this.reset();
 
+                    if (this.game.spectator) return await this.reset();
                     if (!this.game.lobby) await this.setLobby(true);
-                    if (this.game.winner) await this.reset();
 
                     await this.#setPending(true);
                 }
@@ -415,7 +413,7 @@ module.exports = class LogHandler extends EventEmitter {
         const entry = {
             id:        Date.now(),
             mode:      this.game.mode,
-            state:       this.game.state,
+            state:     this.game.state,
             winner:    this.game.winner,
             duration:  this.game.duration,
             players:   this.game.players,
@@ -429,6 +427,8 @@ module.exports = class LogHandler extends EventEmitter {
         this.logger.log(`partie sauvegardée (id: ${entry.id})`);
  
         this.emit('gameSaved', entry);
+
+        await this.reset();
  
         return entry;
     };
