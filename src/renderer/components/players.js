@@ -17,8 +17,10 @@ export default class Players {
         return p.deaths === 0 ? p.kills : p.kills / p.deaths;
     };
 
-    #sort(players) {
-        const order = { blue: 0, red: 1 };
+    #sort(players, self) {
+        const selfTeam = players.find((p) => p.self || p.username === self)?.team;
+        const teams    = ['blue', 'red'].sort((a) => (a === selfTeam ? -1 : 1));
+        const order    = Object.fromEntries(teams.map((t, i) => [t, i]));
 
         return [...players].sort((a, b) => {
             const td  = (order[a.team] ?? 2) - (order[b.team] ?? 2);
@@ -113,7 +115,7 @@ export default class Players {
             return;
         };
 
-        const sorted = this.#sort(players);
+        const sorted = this.#sort(players, self);
         const bestP  = this.#best(sorted);
 
         this.#el.querySelector('.empty-state')?.remove();
