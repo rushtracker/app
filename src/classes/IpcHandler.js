@@ -3,11 +3,14 @@ const { ipcMain, shell, app } = require('electron');
 const https = require('https');
 
 module.exports = class IpcHandler {
+    #store;
+
     constructor(getWindow, handler, sendUpdate, store, sendNotification) {
+        this.#store           = store;
+        
         this.getWindow        = getWindow;
         this.handler          = handler;
         this.sendUpdate       = sendUpdate;
-        this.store            = store;
         this.sendNotification = sendNotification;
 
         this.#register();
@@ -53,7 +56,7 @@ module.exports = class IpcHandler {
         ipcMain.on('shell:openExternal', (_e, url) => shell.openExternal(url));
 
         ipcMain.on('game:delete', (_e, id) => {
-            this.store.remove(id);
+            this.#store.remove(id);
             this.sendUpdate();
             this.sendNotification('deleted');
         });
