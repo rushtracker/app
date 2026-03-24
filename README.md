@@ -65,7 +65,7 @@ Voici la liste des étapes à suivre afin d'exécuter le projet.
 
 <p align="right"><a href="#readme-top">retour en haut</a></p>
 
-<p align="center"><a href="https://github.com/djaana/rush-tracker/blob/main/LICENSE">2026 © Propulsé par Disbot Development</a></p>
+<p align="center"><a href="https://github.com/djaana/rush-tracker/blob/main/LICENSE">2026 © rush tracker</a></p>
 
 [contributors-shield]: https://img.shields.io/github/contributors/djaana/rush-tracker.svg?style=for-the-badge
 [contributors-url]: https://github.com/djaana/rush-tracker/graphs/contributors
