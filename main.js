@@ -31,6 +31,10 @@ function sendUpdate() {
     });
 };
 
+function sendNotification(type, data = {}) {
+    mainWindow?.webContents.send('notification:push', { type, data });
+};
+
 function createTray() {
     const img = nativeImage.createFromPath(iconPath);
 
@@ -110,10 +114,12 @@ app.whenReady().then(() => {
         sendUpdate();
     });
 
-    handler.on('gameSaved', sendUpdate);
+    handler.on('gameSaved',    sendUpdate);
+    handler.on('notification', ({ type, data }) => sendNotification(type, data));
+
     watcher.start();
 
-    new IpcHandler(() => mainWindow, handler, sendUpdate, store);
+    new IpcHandler(() => mainWindow, handler, sendUpdate, store, sendNotification);
 
     app.on('second-instance', () => {
         mainWindow?.show();

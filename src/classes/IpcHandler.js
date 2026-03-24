@@ -3,11 +3,12 @@ const { ipcMain, shell, app } = require('electron');
 const https = require('https');
 
 module.exports = class IpcHandler {
-    constructor(getWindow, handler, sendUpdate, store) {
-        this.getWindow  = getWindow;
-        this.handler    = handler;
-        this.sendUpdate = sendUpdate;
-        this.store      = store;
+    constructor(getWindow, handler, sendUpdate, store, sendNotification) {
+        this.getWindow        = getWindow;
+        this.handler          = handler;
+        this.sendUpdate       = sendUpdate;
+        this.store            = store;
+        this.sendNotification = sendNotification;
 
         this.#register();
 
@@ -39,6 +40,7 @@ module.exports = class IpcHandler {
                 });
             });
 
+            req.setTimeout(10000, () => req.destroy());
             req.on('error', reject);
             req.end();
         });
@@ -53,6 +55,7 @@ module.exports = class IpcHandler {
         ipcMain.on('game:delete', (_e, id) => {
             this.store.remove(id);
             this.sendUpdate();
+            this.sendNotification('deleted');
         });
 
         ipcMain.on('game:stop', async () => {
@@ -65,11 +68,11 @@ module.exports = class IpcHandler {
 
         ipcMain.handle('player:fetch', (_e, username) => this.#fetchPlayer(username).catch(() => null));
     };
- 
+
     #registerDev() {
         const Simulator = require('../../tests/Simulator');
         const sim       = new Simulator(this.handler, this.sendUpdate);
- 
+
         ipcMain.on('sim:start', () => sim.start());
         ipcMain.on('sim:stop',  () => sim.stop());
     };

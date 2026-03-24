@@ -4,12 +4,14 @@ import History      from './components/history.js';
 import PlayerModal  from './components/player-modal.js';
 import ContextMenu  from './components/context-menu.js';
 import InfoModal    from './components/info-modal.js';
+import Notifier     from './components/notification.js';
 
 let lastData      = null;
 let viewingGameId = null;
 
 const playerModal = new PlayerModal();
 const infoModal   = new InfoModal();
+const notifier    = new Notifier();
 
 const contextMenu = new ContextMenu(
     ()   => window.api.stopGame(),
@@ -97,4 +99,6 @@ if (window.api) {
 
         refresh();
     });
+
+    window.api.onNotification(({ type, data }) => notifier.push(type, data));
 };

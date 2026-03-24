@@ -31,20 +31,6 @@ module.exports = class LogHandler extends EventEmitter {
                 }
             },
             {
-                regex: /Vous regardez maintenant (\w+)/u,
-                run: async ([, username]) => {
-                    await this.reset();
- 
-                    this.game.spectator = true;
-                    
-                    await this.startGame();
-                    await this.setGameMode('spectator');
-                    await this.fixPlayer(username);
- 
-                    this.logger.log(`spectateur: ${username}`);
-                }
-            },
-            {
                 regex: /Hide downloading terrain/u,
                 run: async () => {
                     if (!this.game.mode) return;
@@ -64,7 +50,6 @@ module.exports = class LogHandler extends EventEmitter {
                     if (this.game.started || this.game.spectator) return await this.setConnected(username);
 
                     await this.fixPlayer(username);
-
                     await this.#clearPending();
                 }
             },
@@ -81,6 +66,18 @@ module.exports = class LogHandler extends EventEmitter {
                     };
 
                     await this.removePlayer(username);
+                }
+            },
+            {
+                regex: /Vous regardez maintenant (\w+)/u,
+                run: async ([, username]) => {
+                    await this.reset();
+                    await this.setSpectator();
+                    await this.startGame();
+                    await this.setGameMode('spectator');
+                    await this.fixPlayer(username);
+
+                    this.emit('notification', { type: 'spectator', data: {} });
                 }
             },
             {
@@ -107,7 +104,7 @@ module.exports = class LogHandler extends EventEmitter {
                 regex: /Connexion au hub/u,
                 run: async () => {
                     if (this.game.mode && !this.game.lobby && !this.game.spectator) return;
-                    
+
                     await this.reset();
                 }
             },
@@ -124,7 +121,7 @@ module.exports = class LogHandler extends EventEmitter {
                 fromChat: true,
                 run: async ([, privateUser, privateTeam, globalTeam, globalUser]) => {
                     if (!this.game.started) return;
-                    
+
                     await this.setTeam(privateUser || globalUser, privateTeam || globalTeam);
                 }
             },
@@ -144,7 +141,7 @@ module.exports = class LogHandler extends EventEmitter {
                 regex: /Lit intermédiaire détruit par (\w+)/u,
                 run: async ([, breaker]) => {
                     if (!this.game.started) return;
-                    
+
                     await this.#setPending(breaker);
                 }
             },
@@ -154,7 +151,6 @@ module.exports = class LogHandler extends EventEmitter {
                     if (!this.game.started) return;
 
                     await this.setTeam(this.pending, team);
-
                     await this.#clearPending();
                 }
             },
@@ -165,6 +161,8 @@ module.exports = class LogHandler extends EventEmitter {
 
                     await this.setTeam(username, TEAM_LIST.find((t) => t !== TEAMS[team.toLowerCase()]));
                     await this.setBreaker(username);
+
+                    this.emit('notification', { type: 'bedDestroyed', data: { username } });
                 }
             },
             {
@@ -211,7 +209,7 @@ module.exports = class LogHandler extends EventEmitter {
             spectator: false,
             players:   [],
             duration:  null,
-            state:       null,
+            state:     null,
             winner:    null
         };
     };
@@ -227,13 +225,25 @@ module.exports = class LogHandler extends EventEmitter {
     async setLobby(value) {
         this.game.lobby = value;
 
+        if (value) this.emit('notification', { type: 'lobby', data: {} });
+
         this.logger.log('lobby rejoint');
 
         return value;
     };
 
+    async setSpectator() {
+        this.game.spectator = true;
+
+        this.logger.log('mode spectateur');
+
+        return this.game.mode;
+    };
+
     async startGame() {
         this.game.started = true;
+
+        if (!this.game.spectator) this.emit('notification', { type: 'started', data: {} });
 
         this.logger.log('partie démarrée');
     };
@@ -273,25 +283,25 @@ module.exports = class LogHandler extends EventEmitter {
 
     async fixPlayer(username) {
         let player = this.#findPlayer(username);
- 
+
         if (!player) {
             player = {
                 username,
-                team:      null,
-                kills:     0,
-                deaths:    0,
-                self:      this.self === username,
-                breaker:   false,
+                team:       null,
+                kills:      0,
+                deaths:     0,
+                self:       this.self === username,
+                breaker:    false,
                 connection: true
             };
- 
+
             this.game.players.push(player);
- 
+
             this.logger.log(`joueur ajouté: ${username}`);
         };
- 
+
         await this.fixTeams();
- 
+
         return player;
     };
 
@@ -350,14 +360,13 @@ module.exports = class LogHandler extends EventEmitter {
 
     async fixTeams() {
         if (!this.game.mode || !this.game.mode.total) return;
- 
+
         const teamSize = this.game.mode.total / 2;
         const fullTeam = TEAM_LIST.find((team) => this.game.players.filter((p) => p.team === team).length === teamSize);
- 
+
         if (!fullTeam) return;
- 
+
         const otherTeam = TEAM_LIST.find((t) => t !== fullTeam);
- 
         for (const player of this.game.players) {
             if (!player.team) player.team = otherTeam;
         };
@@ -419,17 +428,18 @@ module.exports = class LogHandler extends EventEmitter {
             players:   this.game.players,
             spectator: this.game.spectator,
         };
- 
+
         const games = this.store.read();
         games.unshift(entry);
         this.store.write(games);
- 
+
         this.logger.log(`partie sauvegardée (id: ${entry.id})`);
- 
+
+        this.emit('notification', { type: 'saved', data: {} });
         this.emit('gameSaved', entry);
 
         await this.reset();
- 
+
         return entry;
     };
 
