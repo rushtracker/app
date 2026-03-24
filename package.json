@@ -8,7 +8,7 @@
   },
   "build": {
     "appId": "com.disbot-development.rush-tracker",
-    "productName": "rush tracker",
+    "productName": "rush-tracker",
     "forceCodeSigning": false,
     "win": {
       "target": "portable",
