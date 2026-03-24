@@ -106,7 +106,7 @@ app.whenReady().then(() => {
 
     const watcher = new LogWatcher(join(process.env.APPDATA, process.env.LOG_SUBPATH));
 
-    watcher.on('logUpdate', async (logs) => {
+    watcher.on('log:update', async (logs) => {
         for (const log of logs) {
             await handler.parse(log);
         };
@@ -114,8 +114,8 @@ app.whenReady().then(() => {
         sendUpdate();
     });
 
-    handler.on('gameSaved',    sendUpdate);
-    handler.on('notification', ({ type, data }) => sendNotification(type, data));
+    handler.on('game:saved',    sendUpdate);
+    handler.on('notification:push', ({ type, data }) => sendNotification(type, data));
 
     watcher.start();
 
