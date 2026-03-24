@@ -1,5 +1,5 @@
 const { app, BrowserWindow, Tray, Menu, nativeImage, Notification } = require('electron');
-const { join }                                                      = require('path');
+const { join } = require('path');
 
 require('dotenv').config({
     path: app.isPackaged ? join(process.resourcesPath, '.env') : join(__dirname, '.env'),

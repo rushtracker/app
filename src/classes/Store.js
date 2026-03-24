@@ -1,7 +1,8 @@
-const fs           = require('fs');
-const path         = require('path');
-const zlib         = require('zlib');
-const Logger       = require('./Logger');
+const { existsSync, readFileSync, mkdirSync, writeFileSync } = require('fs');
+const { inflateSync, deflateSync } = require('zlib');
+const { join } = require('path');
+
+const Logger = require('./Logger');
 
 const MAGIC = Buffer.from(process.env.STORE_MAGIC, 'hex');
 
@@ -12,19 +13,19 @@ module.exports = class Store {
     constructor() {
         this.#logger = new Logger();
 
-        this.dir    = path.join(process.env.APPDATA, process.env.STORE_DIR);
-        this.file   = path.join(this.dir, 'cache');
+        this.dir    = join(process.env.APPDATA, process.env.STORE_DIR);
+        this.file   = join(this.dir, 'cache');
     }
 
     read() {
         if (this.#cache) return this.#cache;
         try {
-            if (!fs.existsSync(this.file)) return [];
+            if (!existsSync(this.file)) return [];
 
-            const buf = fs.readFileSync(this.file);
+            const buf = readFileSync(this.file);
             if (buf.length < MAGIC.length || !buf.subarray(0, MAGIC.length).equals(MAGIC)) return [];
 
-            const json = zlib.inflateSync(buf.subarray(MAGIC.length)).toString('utf8');
+            const json = inflateSync(buf.subarray(MAGIC.length)).toString('utf8');
 
             return JSON.parse(json);
         } catch {
@@ -35,10 +36,10 @@ module.exports = class Store {
     write(games) {
         this.#cache = games;
 
-        fs.mkdirSync(this.dir, { recursive: true });
+        mkdirSync(this.dir, { recursive: true });
 
-        const compressed = zlib.deflateSync(Buffer.from(JSON.stringify(games), 'utf8'));
-        fs.writeFileSync(this.file, Buffer.concat([MAGIC, compressed]));
+        const compressed = deflateSync(Buffer.from(JSON.stringify(games), 'utf8'));
+        writeFileSync(this.file, Buffer.concat([MAGIC, compressed]));
 
         this.#logger.log(`cache écrit (${games.length} partie(s))`)
     }

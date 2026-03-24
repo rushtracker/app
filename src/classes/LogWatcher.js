@@ -1,4 +1,5 @@
-const fs           = require('fs');
+const { watchFile, unwatchFile, statSync, existsSync, openSync, readSync, closeSync } = require('fs');
+
 const schedule     = require('node-schedule');
 const EventEmitter = require('events');
 const Logger       = require('./Logger');
@@ -21,7 +22,7 @@ module.exports = class LogWatcher extends EventEmitter {
         this.#midnightJob = schedule.scheduleJob('5 0 0 * * *', () => {
             this.#logger.log('minuit détecté, reprise');
 
-            fs.unwatchFile(this.filePath);
+            unwatchFile(this.filePath);
 
             this.lastSize     = 0;
             this.#midnightJob = null;
@@ -31,15 +32,15 @@ module.exports = class LogWatcher extends EventEmitter {
     }
 
     startWatching() {
-        this.lastSize = fs.statSync(this.filePath).size;
+        this.lastSize = statSync(this.filePath).size;
 
         this.#logger.log('surveillance active');
 
         this.#scheduleMidnight();
 
-        fs.watchFile(this.filePath, { interval: 1000 }, (current, previous) => {
+        watchFile(this.filePath, { interval: 1000 }, (current, previous) => {
             if (current.ino !== previous.ino || current.size < previous.size) {
-                fs.unwatchFile(this.filePath);
+                unwatchFile(this.filePath);
 
                 this.#logger.log('fichier réinitialisé, reprise...');
 
@@ -54,13 +55,13 @@ module.exports = class LogWatcher extends EventEmitter {
     }
 
     handleChange() {
-        const { size } = fs.statSync(this.filePath);
+        const { size } = statSync(this.filePath);
         const bufferSize = size - this.lastSize;
         const buffer     = Buffer.alloc(bufferSize);
-        const fd         = fs.openSync(this.filePath, 'r');
+        const fd         = openSync(this.filePath, 'r');
 
-        fs.readSync(fd, buffer, 0, bufferSize, this.lastSize);
-        fs.closeSync(fd);
+        readSync(fd, buffer, 0, bufferSize, this.lastSize);
+        closeSync(fd);
 
         this.lastSize = size;
 
@@ -75,11 +76,11 @@ module.exports = class LogWatcher extends EventEmitter {
     }
 
     start() {
-        if (!fs.existsSync(this.filePath)) {
+        if (!existsSync(this.filePath)) {
             this.#logger.log('fichier introuvable, attente...');
 
             this.#waitInterval = setInterval(() => {
-                if (fs.existsSync(this.filePath)) {
+                if (existsSync(this.filePath)) {
                     clearInterval(this.#waitInterval);
                     this.#waitInterval = null;
                     this.startWatching();
@@ -103,7 +104,7 @@ module.exports = class LogWatcher extends EventEmitter {
             this.#midnightJob = null;
         }
 
-        fs.unwatchFile(this.filePath);
+        unwatchFile(this.filePath);
 
         this.#logger.log('surveillance arrêtée');
     }
