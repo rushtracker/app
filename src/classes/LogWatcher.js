@@ -15,7 +15,7 @@ module.exports = class LogWatcher extends EventEmitter {
 
         this.filePath       = filePath;
         this.lastSize       = 0;
-    };
+    }
 
     #scheduleMidnight() {
         this.#midnightJob = schedule.scheduleJob('5 0 0 * * *', () => {
@@ -28,7 +28,7 @@ module.exports = class LogWatcher extends EventEmitter {
 
             this.start();
         });
-    };
+    }
 
     startWatching() {
         this.lastSize = fs.statSync(this.filePath).size;
@@ -47,11 +47,11 @@ module.exports = class LogWatcher extends EventEmitter {
                 this.startWatching();
 
                 return;
-            };
+            }
 
             if (current.size > previous.size) this.handleChange();
         });
-    };
+    }
 
     handleChange() {
         const { size } = fs.statSync(this.filePath);
@@ -71,8 +71,8 @@ module.exports = class LogWatcher extends EventEmitter {
 
         if (logs.length > 0) {
             this.emit('log:update', logs);
-        };
-    };
+        }
+    }
 
     start() {
         if (!fs.existsSync(this.filePath)) {
@@ -83,28 +83,28 @@ module.exports = class LogWatcher extends EventEmitter {
                     clearInterval(this.#waitInterval);
                     this.#waitInterval = null;
                     this.startWatching();
-                };
+                }
             }, 1000);
 
             return;
-        };
+        }
 
         this.startWatching();
-    };
+    }
 
     stop() {
         if (this.#waitInterval) {
             clearInterval(this.#waitInterval);
             this.#waitInterval = null;
-        };
+        }
 
         if (this.#midnightJob) {
             this.#midnightJob.cancel();
             this.#midnightJob = null;
-        };
+        }
 
         fs.unwatchFile(this.filePath);
 
         this.#logger.log('surveillance arrêtée');
-    };
-};
+    }
+}

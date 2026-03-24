@@ -29,11 +29,11 @@ function sendUpdate() {
         self:  handler.self,
         games: store.read(),
     });
-};
+}
 
 function sendNotification(type, data = {}) {
     mainWindow?.webContents.send('notification:push', { type, data });
-};
+}
 
 function createTray() {
     const img = nativeImage.createFromPath(iconPath);
@@ -52,7 +52,7 @@ function createTray() {
         mainWindow?.show();
         mainWindow?.focus();
     });
-};
+}
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -86,7 +86,7 @@ function createWindow() {
                 body:  'le logiciel tourne toujours en arrière-plan',
                 icon:  iconPath,
             }).show();
-        };
+        }
     });
 
     mainWindow.webContents.on('before-input-event', (e, input) => {
@@ -96,7 +96,7 @@ function createWindow() {
     mainWindow.webContents.on('devtools-opened', () => {
         mainWindow.webContents.closeDevTools();
     });
-};
+}
 
 app.whenReady().then(() => {
     handler = new LogHandler(store);
@@ -109,7 +109,7 @@ app.whenReady().then(() => {
     watcher.on('log:update', async (logs) => {
         for (const log of logs) {
             await handler.parse(log);
-        };
+        }
 
         sendUpdate();
     });

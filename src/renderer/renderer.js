@@ -35,7 +35,7 @@ function getEtat(game) {
     if (game.mode)    return 'file d\'attente';
 
     return 'hub';
-};
+}
 
 function refresh() {
     if (!lastData) return;
@@ -47,21 +47,21 @@ function refresh() {
     } else {
         const saved = (games || []).find((g) => g.id === viewingGameId);
         if (saved) players.render(saved.players.map((p) => ({ ...p, connection: true })), null, true, viewingGameId);
-    };
+    }
 
     history.render(game, games || [], viewingGameId);
     sidebar.setActive(viewingGameId === null);
-};
+}
 
 function viewCurrent() {
     viewingGameId = null;
     refresh();
-};
+}
 
 function selectGame(id) {
     viewingGameId = (viewingGameId === id) ? null : id;
     refresh();
-};
+}
 
 document.getElementById('btn-minimize').addEventListener('click', () => window.api?.minimize());
 document.getElementById('btn-close').addEventListener('click',    () => window.api?.close());
@@ -71,11 +71,11 @@ document.addEventListener('keydown', (e) => {
         infoModal.close();
         playerModal.close();
         contextMenu.hide();
-    };
+    }
 
     if (e.ctrlKey && e.shiftKey && e.key === 'D') {
         window.api?.simStart();
-    };
+    }
 });
 
 window.api?.getVersion().then((v) => {
@@ -95,10 +95,10 @@ if (window.api) {
 
         if (viewingGameId !== null && !games.some((g) => g.id === viewingGameId)) {
             viewingGameId = null;
-        };
+        }
 
         refresh();
     });
 
     window.api.onNotification(({ type, data }) => notifier.push(type, data));
-};
+}

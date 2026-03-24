@@ -10,9 +10,9 @@ export default class Sidebar {
             btn.dataset.tooltip = btn.title;
             btn.removeAttribute('title');
         });
-    };
+    }
  
     setActive(active) {
         this.#btn.classList.toggle('active', active);
-    };
-};
+    }
+}

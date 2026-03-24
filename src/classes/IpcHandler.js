@@ -16,7 +16,7 @@ module.exports = class IpcHandler {
         this.#register();
 
         if (!app.isPackaged) this.#registerDev();
-    };
+    }
 
     #fetchPlayer(username) {
         return new Promise((resolve, reject) => {
@@ -39,7 +39,7 @@ module.exports = class IpcHandler {
                         resolve(JSON.parse(raw));
                     } catch (e) {
                         reject(e);
-                    };
+                    }
                 });
             });
 
@@ -47,7 +47,7 @@ module.exports = class IpcHandler {
             req.on('error', reject);
             req.end();
         });
-    };
+    }
 
     #register() {
         ipcMain.on('window:minimize',    () => this.getWindow()?.minimize());
@@ -70,7 +70,7 @@ module.exports = class IpcHandler {
         });
 
         ipcMain.handle('player:fetch', (_e, username) => this.#fetchPlayer(username).catch(() => null));
-    };
+    }
 
     #registerDev() {
         const Simulator = require('../../tests/Simulator');
@@ -78,5 +78,5 @@ module.exports = class IpcHandler {
 
         ipcMain.on('sim:start', () => sim.start());
         ipcMain.on('sim:stop',  () => sim.stop());
-    };
-};
+    }
+}

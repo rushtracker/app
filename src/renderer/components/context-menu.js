@@ -22,7 +22,7 @@ export default class ContextMenu {
 
         document.addEventListener('click',       ()  => this.hide());
         document.addEventListener('contextmenu', (e) => { if (!e.target.closest('.card')) this.hide(); });
-    };
+    }
 
     show(e, id) {
         e.preventDefault();
@@ -44,11 +44,11 @@ export default class ContextMenu {
 
         this.#el.style.left = `${Math.max(4, x)}px`;
         this.#el.style.top  = `${Math.max(4, y)}px`;
-    };
+    }
 
     hide() {
         this.#el.classList.remove('open');
         this.#targetId  = null;
         this.#isCurrent = false;
-    };
-};
+    }
+}

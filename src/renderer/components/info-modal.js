@@ -18,13 +18,13 @@ export default class InfoModal {
             e.preventDefault();
             window.api?.openExternal('https://github.com/djaana/rush-tracker');
         });
-    };
+    }
 
     open() {
         this.#overlay.classList.add('open');
-    };
+    }
 
     close() {
         this.#overlay.classList.remove('open');
-    };
-};
+    }
+}

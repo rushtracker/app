@@ -14,7 +14,7 @@ export default class Notifier {
 
     constructor() {
         this.#container = document.getElementById('notif-container');
-    };
+    }
 
     push(type, data = {}) {
         const entry = MESSAGES[type];
@@ -23,7 +23,7 @@ export default class Notifier {
         const { message, sub } = typeof entry === 'function' ? entry(data) : entry;
 
         this.#spawn(message, sub);
-    };
+    }
 
     #spawn(message, sub) {
         const el = document.createElement('div');
@@ -55,7 +55,7 @@ export default class Notifier {
             cancelAnimationFrame(rafId);
             el.classList.add('notif-exit');
             el.addEventListener('animationend', () => el.remove(), { once: true });
-        };
+        }
 
         const tick = (ts) => {
             if (start === null) start = ts - elapsed;
@@ -67,7 +67,7 @@ export default class Notifier {
                 dismiss();
 
                 return;
-            };
+            }
 
             rafId = requestAnimationFrame(tick);
         };
@@ -83,5 +83,5 @@ export default class Notifier {
         });
 
         close.addEventListener('click', () => dismiss());
-    };
-};
+    }
+}

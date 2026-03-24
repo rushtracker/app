@@ -17,13 +17,13 @@ export default class PlayerModal {
         });
         
         document.getElementById('pm-close-btn').addEventListener('click', () => this.close());
-    };
+    }
 
     #setState(state) {
         document.getElementById('pm-loading').style.display = state === 'loading' ? '' : 'none';
         document.getElementById('pm-error').style.display   = state === 'error'   ? '' : 'none';
         document.getElementById('pm-content').style.display = state === 'content' ? '' : 'none';
-    };
+    }
 
     async show(username) {
         this.#headEl.style.opacity = '';
@@ -57,9 +57,9 @@ export default class PlayerModal {
         document.getElementById('pm-time').textContent    = `${fmtTime(rush.timePlayed)}h`;
         
         this.#setState('content');
-    };
+    }
 
     close() {
         this.#overlay.classList.remove('open');
-    };
-};
+    }
+}

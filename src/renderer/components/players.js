@@ -11,11 +11,11 @@ export default class Players {
             const row = e.target.closest('.row');
             if (row) onPlayerClick(row.dataset.username);
         });
-    };
+    }
 
     #kdVal(p) {
         return p.deaths === 0 ? p.kills : p.kills / p.deaths;
-    };
+    }
 
     #sort(players, self) {
         const selfTeam = players.find((p) => p.self || p.username === self)?.team;
@@ -31,11 +31,11 @@ export default class Players {
 
             return a.username.localeCompare(b.username);
         });
-    };
+    }
 
     #best(players) {
         return players.reduce((a, b) => this.#kdVal(b) > this.#kdVal(a) ? b : a);
-    };
+    }
 
     #makeRow(p, self, isBest, delay = 0) {
         const el = document.createElement('div');
@@ -67,7 +67,7 @@ export default class Players {
             d:    el.querySelector('.stat-d'),
             kd:   el.querySelector('.stat-kd'),
         };
-    };
+    }
 
     #updateRow(entry, p, isBest) {
         entry.el.className = `row${p.connection === false ? ' disconnected' : ''}`;
@@ -81,7 +81,7 @@ export default class Players {
         entry.k.textContent  = p.kills;
         entry.d.textContent  = p.deaths;
         entry.kd.textContent = kd(p.kills, p.deaths);
-    };
+    }
 
     #showEmpty() {
         if (this.#el.querySelector('.empty-state')) return;
@@ -91,12 +91,12 @@ export default class Players {
         el.textContent = 'en attente des joueurs...';
 
         this.#el.appendChild(el);
-    };
+    }
 
     #clear() {
         this.#el.innerHTML = '';
         this.#rows.clear();
-    };
+    }
 
     render(players, self, isStatic = false, gameId = null) {
         if (isStatic) {
@@ -104,16 +104,16 @@ export default class Players {
             this.#lastGameId = gameId;
         } else {
             this.#lastGameId = null;
-        };
+        }
 
         if (!players?.length) {
             if (!this.#el.querySelector('.empty-state')) {
                 this.#clear();
                 this.#showEmpty();
-            };
+            }
 
             return;
-        };
+        }
 
         const sorted = this.#sort(players, self);
         const bestP  = this.#best(sorted);
@@ -130,7 +130,7 @@ export default class Players {
             });
 
             return;
-        };
+        }
 
         const incoming = new Set(sorted.map((p) => p.username));
 
@@ -138,8 +138,8 @@ export default class Players {
             if (!incoming.has(username)) {
                 this.#rows.delete(username);
                 entry.el.remove();
-            };
-        };
+            }
+        }
 
         sorted.forEach((p, i) => {
             const isBest = p.username === bestP.username;
@@ -149,11 +149,11 @@ export default class Players {
             } else {
                 const entry = this.#makeRow(p, self, isBest, i * 25);
                 this.#rows.set(p.username, entry);
-            };
+            }
         });
 
         sorted.forEach((p) => {
             this.#el.appendChild(this.#rows.get(p.username).el);
         });
-    };
-};
+    }
+}

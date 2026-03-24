@@ -27,7 +27,7 @@ export default class History {
 
             onContextMenu(e, id === 'current' ? 'current' : Number(id));
         });
-    };
+    }
 
     #buildCurrentCard(game) {
         const el = document.createElement('div');
@@ -41,7 +41,7 @@ export default class History {
         `;
 
         return el;
-    };
+    }
 
     #buildCard(g) {
         const el = document.createElement('div');
@@ -61,7 +61,7 @@ export default class History {
 
             resultLabel = labels[g.state]  || 'inconnu';
             resultClass = classes[g.state] || 'muted';
-        };
+        }
 
         el.innerHTML = `
             <div class="card-top">
@@ -75,15 +75,15 @@ export default class History {
         `;
 
         return el;
-    };
+    }
 
     #setClass(el, id, viewingGameId) {
         if (id === 'current') {
             el.className = `card current${viewingGameId === null ? ' selected' : ''}`;
         } else {
             el.className = `card${viewingGameId === Number(id) ? ' selected' : ''}`;
-        };
-    };
+        }
+    }
 
     render(game, games, viewingGameId) {
         const isFirst = this.#isFirst;
@@ -99,8 +99,8 @@ export default class History {
                 this.#cards.delete(id);
                 el.classList.add('card-exit');
                 el.addEventListener('animationend', () => el.remove(), { once: true });
-            };
-        };
+            }
+        }
 
         this.#el.querySelector('.history-empty')?.remove();
 
@@ -128,16 +128,16 @@ export default class History {
                         anchor = next;
                         
                         break;
-                    };
-                };
+                    }
+                }
 
                 anchor ? this.#el.insertBefore(el, anchor) : this.#el.appendChild(el);
 
                 this.#cards.set(id, el);
 
                 newIdx++;
-            };
-        };
+            }
+        }
 
         if (!incoming.size) {
             const empty = document.createElement('div');
@@ -145,6 +145,6 @@ export default class History {
             empty.textContent = 'aucune partie enregistrée';
             
             this.#el.appendChild(empty);
-        };
-    };
-};
+        }
+    }
+}

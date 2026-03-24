@@ -14,7 +14,7 @@ module.exports = class Store {
 
         this.dir    = path.join(process.env.APPDATA, process.env.STORE_DIR);
         this.file   = path.join(this.dir, 'cache');
-    };
+    }
 
     read() {
         if (this.#cache) return this.#cache;
@@ -29,8 +29,8 @@ module.exports = class Store {
             return JSON.parse(json);
         } catch {
             return [];
-        };
-    };
+        }
+    }
 
     write(games) {
         this.#cache = games;
@@ -41,7 +41,7 @@ module.exports = class Store {
         fs.writeFileSync(this.file, Buffer.concat([MAGIC, compressed]));
 
         this.#logger.log(`cache écrit (${games.length} partie(s))`)
-    };
+    }
 
     remove(id) {
         this.#cache = null;
@@ -49,5 +49,5 @@ module.exports = class Store {
         this.write(this.read().filter((g) => g.id !== id));
 
         this.#logger.log(`partie supprimée: ${id}`);
-    };
-};
+    }
+}
