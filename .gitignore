@@ -1,6 +1,10 @@
 node_modules/
 dist/
 archives/
+
 package-lock.json
 desktop.ini
+
 *.env
+
+todo
