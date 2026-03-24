@@ -9,6 +9,7 @@
   "build": {
     "appId": "com.rush.tracker",
     "productName": "rush-tracker",
+    "afterPack": "./scripts/after-pack.js",
     "win": {
       "target": "portable",
       "artifactName": "${productName}.exe",
@@ -40,6 +41,7 @@
   "license": "GPL 3.0",
   "description": "minecraft rush statistics tracker",
   "devDependencies": {
+    "@electron/asar": "^3.2.0",
     "electron": "^41.0.3",
     "electron-builder": "^26.8.1"
   },
