@@ -9,7 +9,6 @@
   "build": {
     "appId": "com.disbot-development.rush-tracker",
     "productName": "rush-tracker",
-    "forceCodeSigning": false,
     "win": {
       "target": "portable",
       "artifactName": "${productName}.exe",
@@ -31,9 +30,12 @@
     "files": [
       "main.js",
       "preload.js",
-      "src/**",
-      "renderer/**"
-    ]
+      "src/**"
+    ],
+    "asar": true,
+    "compression": "maximum",
+    "electronLanguages": ["fr"],
+    "removePackageScripts": true
   },
   "author": "djaaana",
   "license": "GPL 3.0",
