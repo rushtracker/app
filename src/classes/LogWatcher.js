@@ -1,6 +1,6 @@
 const { watchFile, unwatchFile, statSync, existsSync, openSync, readSync, closeSync } = require('fs');
+const { scheduleJob } = require('node-schedule');
 
-const schedule     = require('node-schedule');
 const EventEmitter = require('events');
 const Logger       = require('./Logger');
 
@@ -19,7 +19,7 @@ module.exports = class LogWatcher extends EventEmitter {
     }
 
     #scheduleMidnight() {
-        this.#midnightJob = schedule.scheduleJob('5 0 0 * * *', () => {
+        this.#midnightJob = scheduleJob('5 0 0 * * *', () => {
             this.#logger.log('minuit détecté, reprise');
 
             unwatchFile(this.filePath);

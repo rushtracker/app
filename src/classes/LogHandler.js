@@ -2,9 +2,9 @@ const EventEmitter = require('events');
 const Logger       = require('./Logger');
 
 const TEAMS     = { bleu: 'blue', blue: 'blue', rouge: 'red', red: 'red' };
+const TEAM_LIST = [...new Set(Object.values(TEAMS))];
 const STATES    = { victoire: 'win', défaite: 'loose', égalité: 'draw' };
 const CHAT_FLAG = '✴';
-const TEAM_LIST = [...new Set(Object.values(TEAMS))];
 
 const GAMEMODES = [
     { name: '1v1',       label: '1v1 [FAST]', total: 2  },

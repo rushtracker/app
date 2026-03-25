@@ -1,6 +1,6 @@
 const { ipcMain, shell, app } = require('electron');
+const { request } = require('https');
 
-const https = require('https');
 
 module.exports = class IpcHandler {
     #store;
@@ -20,7 +20,7 @@ module.exports = class IpcHandler {
 
     #fetchPlayer(username) {
         return new Promise((resolve, reject) => {
-            const req = https.request({
+            const req = request({
                 hostname: process.env.API_HOSTNAME,
                 path:     `/api/player/${encodeURIComponent(username)}`,
                 method:   'GET',
