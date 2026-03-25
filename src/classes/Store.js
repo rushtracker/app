@@ -7,48 +7,48 @@ const Logger = require('./Logger');
 const MAGIC = Buffer.from(process.env.STORE_MAGIC, 'hex');
 
 module.exports = class Store {
-    #logger;
-    #cache;
+  #logger;
+  #cache;
 
-    constructor() {
-        this.#logger = new Logger();
+  constructor() {
+    this.#logger = new Logger();
 
-        this.dir    = join(process.env.APPDATA, process.env.STORE_DIR);
-        this.file   = join(this.dir, 'cache');
+    this.dir    = join(process.env.APPDATA, process.env.STORE_DIR);
+    this.file   = join(this.dir, 'cache');
+  }
+
+  read() {
+    if (this.#cache) return this.#cache;
+    try {
+      if (!existsSync(this.file)) return [];
+
+      const buf = readFileSync(this.file);
+      if (buf.length < MAGIC.length || !buf.subarray(0, MAGIC.length).equals(MAGIC)) return [];
+
+      const json = inflateSync(buf.subarray(MAGIC.length)).toString('utf8');
+
+      return JSON.parse(json);
+    } catch {
+      return [];
     }
+  }
 
-    read() {
-        if (this.#cache) return this.#cache;
-        try {
-            if (!existsSync(this.file)) return [];
+  write(games) {
+    this.#cache = games;
 
-            const buf = readFileSync(this.file);
-            if (buf.length < MAGIC.length || !buf.subarray(0, MAGIC.length).equals(MAGIC)) return [];
+    mkdirSync(this.dir, { recursive: true });
 
-            const json = inflateSync(buf.subarray(MAGIC.length)).toString('utf8');
+    const compressed = deflateSync(Buffer.from(JSON.stringify(games), 'utf8'));
+    writeFileSync(this.file, Buffer.concat([MAGIC, compressed]));
 
-            return JSON.parse(json);
-        } catch {
-            return [];
-        }
-    }
+    this.#logger.log(`cache écrit (${games.length} partie(s))`)
+  }
 
-    write(games) {
-        this.#cache = games;
+  remove(id) {
+    this.#cache = null;
+    
+    this.write(this.read().filter((g) => g.id !== id));
 
-        mkdirSync(this.dir, { recursive: true });
-
-        const compressed = deflateSync(Buffer.from(JSON.stringify(games), 'utf8'));
-        writeFileSync(this.file, Buffer.concat([MAGIC, compressed]));
-
-        this.#logger.log(`cache écrit (${games.length} partie(s))`)
-    }
-
-    remove(id) {
-        this.#cache = null;
-        
-        this.write(this.read().filter((g) => g.id !== id));
-
-        this.#logger.log(`partie supprimée: ${id}`);
-    }
+    this.#logger.log(`partie supprimée: ${id}`);
+  }
 }

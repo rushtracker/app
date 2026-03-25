@@ -1,36 +1,36 @@
 .ctx-menu {
-    position: fixed;
-    z-index: 200;
-    background: var(--surface);
-    border: 1px solid var(--border2);
-    border-radius: 4px;
-    padding: 3px;
-    min-width: 130px;
-    opacity: 0;
-    pointer-events: none;
-    transform: scale(.97);
-    transform-origin: top left;
-    transition: opacity .1s, transform .1s;
+  position: fixed;
+  z-index: 200;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 3px;
+  min-width: 130px;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(.97);
+  transform-origin: top left;
+  transition: opacity .1s, transform .1s;
 }
 
 .ctx-menu.open {
-    opacity: 1;
-    pointer-events: all;
-    transform: scale(1);
+  opacity: 1;
+  pointer-events: all;
+  transform: scale(1);
 }
 
 .ctx-item {
-    width: 100%;
-    padding: 6px 10px;
-    border: none;
-    background: transparent;
-    color: var(--text);
-    text-align: left;
-    font-family: 'Inter', sans-serif;
-    font-size: 12px;
-    border-radius: 3px;
-    cursor: pointer;
-    transition: background .1s;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background .1s;
 }
 
 .ctx-item               { color: var(--text-dim); }
@@ -38,7 +38,7 @@
 .ctx-item.danger:hover  { background: var(--red-bg); color: var(--red); }
 
 #ctx-export + .ctx-item.danger {
-    margin-top: 2px;
-    border-top: 1px solid var(--border);
-    padding-top: 7px;
+  margin-top: 2px;
+  border-top: 1px solid var(--border);
+  padding-top: 7px;
 }

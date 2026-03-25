@@ -14,99 +14,99 @@ const infoModal   = new InfoModal();
 const notifier    = new Notifier();
 
 const contextMenu = new ContextMenu(
-    ()   => window.api.stopGame(),
-    (id) => {
-        window.api.deleteGame(id);
-        if (viewingGameId === id) viewingGameId = null;
-    },
-    () => notifier.push('copié dans le presse-papier')
+  ()   => window.api.stopGame(),
+  (id) => {
+    window.api.deleteGame(id);
+    if (viewingGameId === id) viewingGameId = null;
+  },
+  () => notifier.push('copié dans le presse-papier')
 );
 
 const history = new History(
-    (id) => id === 'current' ? viewCurrent() : selectGame(id),
-    (e, id) => {
-        const game = id !== 'current' ? (lastData?.games || []).find((g) => g.id === id) : null;
-        contextMenu.showForGame(e, id, game);
-    }
+  (id) => id === 'current' ? viewCurrent() : selectGame(id),
+  (e, id) => {
+    const game = id !== 'current' ? (lastData?.games || []).find((g) => g.id === id) : null;
+    contextMenu.showForGame(e, id, game);
+  }
 );
 
 const players = new Players(
-    (username) => playerModal.show(username),
-    (e, player, allPlayers) => contextMenu.showForPlayer(e, player, allPlayers)
+  (username) => playerModal.show(username),
+  (e, player, allPlayers) => contextMenu.showForPlayer(e, player, allPlayers)
 );
 
 const sidebar = new Sidebar(() => viewCurrent());
 
 function getEtat(game) {
-    if (game.started) return 'en partie';
-    if (game.lobby)   return 'lobby';
-    if (game.mode)    return 'file d\'attente';
+  if (game.started) return 'en partie';
+  if (game.lobby)   return 'lobby';
+  if (game.mode)    return 'file d\'attente';
 
-    return 'hub';
+  return 'hub';
 }
 
 function refresh() {
-    if (!lastData) return;
+  if (!lastData) return;
 
-    const { game, self, games } = lastData;
+  const { game, self, games } = lastData;
 
-    if (viewingGameId === null) {
-        players.render(game.players, self, false);
-    } else {
-        const saved = (games || []).find((g) => g.id === viewingGameId);
-        if (saved) players.render(saved.players.map((p) => ({ ...p, connection: true })), null, true, viewingGameId);
-    }
+  if (viewingGameId === null) {
+    players.render(game.players, self, false);
+  } else {
+    const saved = (games || []).find((g) => g.id === viewingGameId);
+    if (saved) players.render(saved.players.map((p) => ({ ...p, connection: true })), null, true, viewingGameId);
+  }
 
-    history.render(game, games || [], viewingGameId);
-    sidebar.setActive(viewingGameId === null);
+  history.render(game, games || [], viewingGameId);
+  sidebar.setActive(viewingGameId === null);
 }
 
 function viewCurrent() {
-    viewingGameId = null;
-    refresh();
+  viewingGameId = null;
+  refresh();
 }
 
 function selectGame(id) {
-    viewingGameId = (viewingGameId === id) ? null : id;
-    refresh();
+  viewingGameId = (viewingGameId === id) ? null : id;
+  refresh();
 }
 
 document.getElementById('btn-minimize').addEventListener('click', () => window.api?.minimize());
 document.getElementById('btn-close').addEventListener('click',    () => window.api?.close());
 
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        infoModal.close();
-        playerModal.close();
-        contextMenu.hide();
-    }
+  if (e.key === 'Escape') {
+    infoModal.close();
+    playerModal.close();
+    contextMenu.hide();
+  }
 
-    if (e.ctrlKey && e.shiftKey && e.key === 'D') {
-        window.api?.simStart();
-    }
+  if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+    window.api?.simStart();
+  }
 });
 
 window.api?.getVersion().then((v) => {
-    document.getElementById('s-version').textContent = v;
+  document.getElementById('s-version').textContent = v;
 });
 
 if (window.api) {
-    window.api.onGameUpdate((data) => {
-        lastData = data;
+  window.api.onGameUpdate((data) => {
+    lastData = data;
 
-        const { game, self } = data;
-        const games = data.games || [];
+    const { game, self } = data;
+    const games = data.games || [];
 
-        document.getElementById('s-pseudo').textContent = self || '—';
-        document.getElementById('s-mode').textContent   = game.mode?.name || '—';
-        document.getElementById('s-etat').textContent   = getEtat(game);
+    document.getElementById('s-pseudo').textContent = self || '—';
+    document.getElementById('s-mode').textContent   = game.mode?.name || '—';
+    document.getElementById('s-etat').textContent   = getEtat(game);
 
-        if (viewingGameId !== null && !games.some((g) => g.id === viewingGameId)) {
-            viewingGameId = null;
-        }
+    if (viewingGameId !== null && !games.some((g) => g.id === viewingGameId)) {
+      viewingGameId = null;
+    }
 
-        refresh();
-    });
+    refresh();
+  });
 
-    window.api.onNotification(({ message, sub }) => notifier.push(message, sub));
+  window.api.onNotification(({ message, sub }) => notifier.push(message, sub));
 }

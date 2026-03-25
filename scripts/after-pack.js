@@ -3,31 +3,31 @@ const { extractAll, createPackage } = require('@electron/asar');
 const { join } = require('path');
 
 async function processFile(filePath) {
-    const content = await readFile(filePath, 'utf-8');
-    const result  = content.replace(/(\r?\n){2,}/g, '\n');
+  const content = await readFile(filePath, 'utf-8');
+  const result  = content.replace(/(\r?\n){2,}/g, '\n');
 
-    await writeFile(filePath, result, 'utf-8');
+  await writeFile(filePath, result, 'utf-8');
 }
 
 async function walkDir(dirPath) {
-    const entries = await readdir(dirPath, { withFileTypes: true });
+  const entries = await readdir(dirPath, { withFileTypes: true });
 
-    await Promise.all(entries.map(async (entry) => {
-        const full = join(dirPath, entry.name);
+  await Promise.all(entries.map(async (entry) => {
+    const full = join(dirPath, entry.name);
 
-        if (entry.isDirectory()) return walkDir(full);
-        if (/\.(js|css|html)$/.test(entry.name)) return processFile(full);
-    }));
+    if (entry.isDirectory()) return walkDir(full);
+    if (/\.(js|css|html)$/.test(entry.name)) return processFile(full);
+  }));
 }
 
 module.exports = async ({ appOutDir }) => {
-    const asarPath    = join(appOutDir, 'resources', 'app.asar');
-    const extractPath = join(appOutDir, 'resources', 'app-minified');
+  const asarPath    = join(appOutDir, 'resources', 'app.asar');
+  const extractPath = join(appOutDir, 'resources', 'app-minified');
 
-    extractAll(asarPath, extractPath);
+  extractAll(asarPath, extractPath);
 
-    await walkDir(extractPath);
+  await walkDir(extractPath);
 
-    await createPackage(extractPath, asarPath);
-    await rm(extractPath, { recursive: true, force: true });
+  await createPackage(extractPath, asarPath);
+  await rm(extractPath, { recursive: true, force: true });
 };

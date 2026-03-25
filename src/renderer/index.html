@@ -1,193 +1,193 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>rush tracker</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="components/sidebar.css" />
-    <link rel="stylesheet" href="components/players.css" />
-    <link rel="stylesheet" href="components/history.css" />
-    <link rel="stylesheet" href="components/player-modal.css" />
-    <link rel="stylesheet" href="components/context-menu.css" />
-    <link rel="stylesheet" href="components/info-modal.css" />
-    <link rel="stylesheet" href="components/notification.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>rush tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="components/sidebar.css" />
+  <link rel="stylesheet" href="components/players.css" />
+  <link rel="stylesheet" href="components/history.css" />
+  <link rel="stylesheet" href="components/player-modal.css" />
+  <link rel="stylesheet" href="components/context-menu.css" />
+  <link rel="stylesheet" href="components/info-modal.css" />
+  <link rel="stylesheet" href="components/notification.css" />
 </head>
 <body>
 
 <div class="window">
-    <div class="titlebar">
-        <div class="dot"></div>
-        <span class="title">rush tracker</span>
-        <div class="controls">
-            <button id="btn-minimize" class="minimize">—</button>
-            <button id="btn-close"    class="close">✕</button>
-        </div>
+  <div class="titlebar">
+    <div class="dot"></div>
+    <span class="title">rush tracker</span>
+    <div class="controls">
+      <button id="btn-minimize" class="minimize">—</button>
+      <button id="btn-close"    class="close">✕</button>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="sidebar">
+      <button id="btn-current" title="partie actuelle">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M6 20v-2a6 6 0 0 1 12 0v2"/>
+        </svg>
+      </button>
+      <div class="spacer"></div>
+      <button id="btn-info" title="informations">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="16" x2="12" y2="12"/>
+          <line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+      </button>
     </div>
 
-    <div class="body">
-        <div class="sidebar">
-            <button id="btn-current" title="partie actuelle">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="8" r="4"/>
-                    <path d="M6 20v-2a6 6 0 0 1 12 0v2"/>
-                </svg>
-            </button>
-            <div class="spacer"></div>
-            <button id="btn-info" title="informations">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="12" y1="16" x2="12" y2="12"/>
-                    <line x1="12" y1="8" x2="12.01" y2="8"/>
-                </svg>
-            </button>
-        </div>
-
-        <div class="main">
-            <div class="col-header">
-                <span class="ch-name">Joueur</span>
-                <span class="ch-k">K</span>
-                <span class="ch-d">D</span>
-                <span class="ch-kd">K/D</span>
-            </div>
-            <div class="rows" id="player-rows">
-                <div class="empty-state">en attente des joueurs...</div>
-            </div>
-        </div>
-
-        <div class="history" id="history-cards"></div>
+    <div class="main">
+      <div class="col-header">
+        <span class="ch-name">Joueur</span>
+        <span class="ch-k">K</span>
+        <span class="ch-d">D</span>
+        <span class="ch-kd">K/D</span>
+      </div>
+      <div class="rows" id="player-rows">
+        <div class="empty-state">en attente des joueurs...</div>
+      </div>
     </div>
 
-    <div class="statusbar">
-        <div class="status-item">
-            <span class="key">Pseudo :</span>
-            <span class="val" id="s-pseudo">—</span>
-        </div>
-        <div class="status-item">
-            <span class="key">Etat :</span>
-            <span class="val" id="s-etat">hub</span>
-        </div>
-        <div class="status-item">
-            <span class="key">Mode :</span>
-            <span class="val" id="s-mode">—</span>
-        </div>
-        <div class="status-item">
-            <span class="key">Version :</span>
-            <span class="val" id="s-version">—</span>
-        </div>
+    <div class="history" id="history-cards"></div>
+  </div>
+
+  <div class="statusbar">
+    <div class="status-item">
+      <span class="key">Pseudo :</span>
+      <span class="val" id="s-pseudo">—</span>
     </div>
+    <div class="status-item">
+      <span class="key">Etat :</span>
+      <span class="val" id="s-etat">hub</span>
+    </div>
+    <div class="status-item">
+      <span class="key">Mode :</span>
+      <span class="val" id="s-mode">—</span>
+    </div>
+    <div class="status-item">
+      <span class="key">Version :</span>
+      <span class="val" id="s-version">—</span>
+    </div>
+  </div>
 </div>
 
 <div class="notif-container" id="notif-container"></div>
 
 <div class="modal-overlay" id="modal">
-    <div class="modal">
-        <div class="modal-header">
-            <span>Informations</span>
-            <button id="btn-modal-close">✕</button>
-        </div>
-        <div class="modal-body">
-            <div class="modal-row">
-                <span class="modal-label">Support</span>
-                <a id="link-discord" class="modal-link" href="https://discord.gg/mWF6wqARdP">discord</a>
-            </div>
-            <div class="modal-row">
-                <span class="modal-label">Source</span>
-                <a id="link-github" class="modal-link" href="https://github.com/djaana/rush-tracker">github</a>
-            </div>
-        </div>
-        <div class="modal-footer">2026 © rush tracker</div>
+  <div class="modal">
+    <div class="modal-header">
+      <span>Informations</span>
+      <button id="btn-modal-close">✕</button>
     </div>
+    <div class="modal-body">
+      <div class="modal-row">
+        <span class="modal-label">Support</span>
+        <a id="link-discord" class="modal-link" href="https://discord.gg/mWF6wqARdP">discord</a>
+      </div>
+      <div class="modal-row">
+        <span class="modal-label">Source</span>
+        <a id="link-github" class="modal-link" href="https://github.com/djaana/rush-tracker">github</a>
+      </div>
+    </div>
+    <div class="modal-footer">2026 © rush tracker</div>
+  </div>
 </div>
 
 <div class="modal-overlay" id="player-modal">
-    <div class="modal pm-modal">
-        <div class="pm-header">
-            <div class="pm-identity">
-                <img id="pm-head" class="pm-head" src="" alt="" onerror="this.style.opacity='0'" />
-                <span id="pm-name" class="pm-name"></span>
-            </div>
-            <button id="pm-close-btn" class="pm-close-btn">✕</button>
-        </div>
-
-        <div id="pm-loading" class="pm-loading">
-            <div class="pm-spinner"></div>
-            <span>chargement...</span>
-        </div>
-
-        <div id="pm-error" class="pm-error" style="display:none">
-            <span>joueur introuvable</span>
-        </div>
-
-        <div id="pm-content" class="pm-content" style="display:none">
-            <div class="pm-badges">
-                <div class="pm-badge">
-                    <span class="pm-badge-label">Winrate</span>
-                    <span id="pm-winrate" class="pm-badge-val">—</span>
-                </div>
-                <div class="pm-badge">
-                    <span class="pm-badge-label">K/D</span>
-                    <span id="pm-kd" class="pm-badge-val">—</span>
-                </div>
-                <div class="pm-badge">
-                    <span class="pm-badge-label">Points</span>
-                    <span id="pm-points" class="pm-badge-val">—</span>
-                </div>
-            </div>
-
-            <div class="pm-stats">
-                <div class="pm-stat-row">
-                    <span class="pm-stat-label">Parties</span>
-                    <span id="pm-played" class="pm-stat-val">—</span>
-                </div>
-                <div class="pm-stat-row">
-                    <span class="pm-stat-label">Victoires</span>
-                    <span id="pm-wins" class="pm-stat-val">—</span>
-                </div>
-                <div class="pm-stat-row">
-                    <span class="pm-stat-label">Défaites</span>
-                    <span id="pm-losses" class="pm-stat-val">—</span>
-                </div>
-                <div class="pm-stat-divider"></div>
-                <div class="pm-stat-row">
-                    <span class="pm-stat-label">Kills</span>
-                    <span id="pm-kills" class="pm-stat-val">—</span>
-                </div>
-                <div class="pm-stat-row">
-                    <span class="pm-stat-label">Morts</span>
-                    <span id="pm-deaths" class="pm-stat-val">—</span>
-                </div>
-                <div class="pm-stat-row">
-                    <span class="pm-stat-label">KillStreak</span>
-                    <span id="pm-ks" class="pm-stat-val">—</span>
-                </div>
-                <div class="pm-stat-divider"></div>
-                <div class="pm-stat-row">
-                    <span class="pm-stat-label">Temps de jeu</span>
-                    <span id="pm-time" class="pm-stat-val">—</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="pm-footer">
-            <button id="pm-profile-btn" class="pm-profile-btn">
-                voir le profil
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                    <polyline points="15 3 21 3 21 9"/>
-                    <line x1="10" y1="14" x2="21" y2="3"/>
-                </svg>
-            </button>
-        </div>
+  <div class="modal pm-modal">
+    <div class="pm-header">
+      <div class="pm-identity">
+        <img id="pm-head" class="pm-head" src="" alt="" onerror="this.style.opacity='0'" />
+        <span id="pm-name" class="pm-name"></span>
+      </div>
+      <button id="pm-close-btn" class="pm-close-btn">✕</button>
     </div>
+
+    <div id="pm-loading" class="pm-loading">
+      <div class="pm-spinner"></div>
+      <span>chargement...</span>
+    </div>
+
+    <div id="pm-error" class="pm-error" style="display:none">
+      <span>joueur introuvable</span>
+    </div>
+
+    <div id="pm-content" class="pm-content" style="display:none">
+      <div class="pm-badges">
+        <div class="pm-badge">
+          <span class="pm-badge-label">Winrate</span>
+          <span id="pm-winrate" class="pm-badge-val">—</span>
+        </div>
+        <div class="pm-badge">
+          <span class="pm-badge-label">K/D</span>
+          <span id="pm-kd" class="pm-badge-val">—</span>
+        </div>
+        <div class="pm-badge">
+          <span class="pm-badge-label">Points</span>
+          <span id="pm-points" class="pm-badge-val">—</span>
+        </div>
+      </div>
+
+      <div class="pm-stats">
+        <div class="pm-stat-row">
+          <span class="pm-stat-label">Parties</span>
+          <span id="pm-played" class="pm-stat-val">—</span>
+        </div>
+        <div class="pm-stat-row">
+          <span class="pm-stat-label">Victoires</span>
+          <span id="pm-wins" class="pm-stat-val">—</span>
+        </div>
+        <div class="pm-stat-row">
+          <span class="pm-stat-label">Défaites</span>
+          <span id="pm-losses" class="pm-stat-val">—</span>
+        </div>
+        <div class="pm-stat-divider"></div>
+        <div class="pm-stat-row">
+          <span class="pm-stat-label">Kills</span>
+          <span id="pm-kills" class="pm-stat-val">—</span>
+        </div>
+        <div class="pm-stat-row">
+          <span class="pm-stat-label">Morts</span>
+          <span id="pm-deaths" class="pm-stat-val">—</span>
+        </div>
+        <div class="pm-stat-row">
+          <span class="pm-stat-label">KillStreak</span>
+          <span id="pm-ks" class="pm-stat-val">—</span>
+        </div>
+        <div class="pm-stat-divider"></div>
+        <div class="pm-stat-row">
+          <span class="pm-stat-label">Temps de jeu</span>
+          <span id="pm-time" class="pm-stat-val">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pm-footer">
+      <button id="pm-profile-btn" class="pm-profile-btn">
+        voir le profil
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+          <polyline points="15 3 21 3 21 9"/>
+          <line x1="10" y1="14" x2="21" y2="3"/>
+        </svg>
+      </button>
+    </div>
+  </div>
 </div>
 
 <div class="ctx-menu" id="ctx-menu">
-    <button class="ctx-item" id="ctx-export">exporter</button>
-    <button class="ctx-item danger" id="ctx-stop">interrompre</button>
-    <button class="ctx-item danger" id="ctx-delete">supprimer</button>
+  <button class="ctx-item" id="ctx-export">exporter</button>
+  <button class="ctx-item danger" id="ctx-stop">interrompre</button>
+  <button class="ctx-item danger" id="ctx-delete">supprimer</button>
 </div>
 
 <script type="module" src="renderer.js"></script>

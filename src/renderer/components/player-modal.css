@@ -1,176 +1,176 @@
 .pm-modal { width: 260px; }
 
 .pm-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 14px 10px;
-    border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--border);
 }
 
 .pm-identity {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .pm-head {
-    width: 36px; height: 36px;
-    border-radius: 3px;
-    image-rendering: pixelated;
-    background: var(--border2);
-    flex-shrink: 0;
+  width: 36px; height: 36px;
+  border-radius: 3px;
+  image-rendering: pixelated;
+  background: var(--border2);
+  flex-shrink: 0;
 }
 
 .pm-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text);
-    letter-spacing: .01em;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: .01em;
 }
 
 .pm-close-btn {
-    width: 20px; height: 20px;
-    border: none;
-    background: transparent;
-    color: var(--text-muted);
-    font-size: 11px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 3px;
-    transition: all .12s;
-    flex-shrink: 0;
+  width: 20px; height: 20px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 11px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 3px;
+  transition: all .12s;
+  flex-shrink: 0;
 }
 
 .pm-close-btn:hover { background: var(--border2); color: var(--text); }
 
 .pm-loading {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    padding: 28px 0;
-    font-size: 11px;
-    color: var(--text-muted);
-    letter-spacing: .04em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 28px 0;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: .04em;
 }
 
 .pm-spinner {
-    width: 18px; height: 18px;
-    border: 2px solid var(--border2);
-    border-top-color: var(--text-muted);
-    border-radius: 50%;
-    animation: pm-spin .7s linear infinite;
+  width: 18px; height: 18px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--text-muted);
+  border-radius: 50%;
+  animation: pm-spin .7s linear infinite;
 }
 
 @keyframes pm-spin { to { transform: rotate(360deg); } }
 
 .pm-error {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 28px 14px;
-    font-size: 11px;
-    color: var(--text-muted);
-    letter-spacing: .03em;
-    text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 14px;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: .03em;
+  text-align: center;
 }
 
 .pm-content { padding: 12px 14px 0; }
 
 .pm-badges {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 12px;
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
 }
 
 .pm-badge {
-    flex: 1;
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: 4px;
-    padding: 7px 6px 6px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
+  flex: 1;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 7px 6px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
 }
 
 .pm-badge-label {
-    font-size: 9px;
-    font-weight: 500;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: .08em;
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
 }
 
 .pm-badge-val {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text);
-    font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
 }
 
 .pm-stats {
-    display: flex;
-    flex-direction: column;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 .pm-stat-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 6px 10px;
-    font-size: 11px;
-    border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  font-size: 11px;
+  border-bottom: 1px solid var(--border);
 }
 
 .pm-stat-row:last-child { border-bottom: none; }
 
 .pm-stat-label {
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  font-size: 10px;
 }
 
 .pm-stat-val {
-    color: var(--text);
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
+  color: var(--text);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .pm-stat-divider {
-    height: 1px;
-    background: var(--border2);
+  height: 1px;
+  background: var(--border2);
 }
 
 .pm-footer { padding: 10px 14px 12px; }
 
 .pm-profile-btn {
-    width: 100%;
-    height: 28px;
-    border: 1px solid var(--border2);
-    border-radius: 4px;
-    background: var(--surface2);
-    color: var(--text-dim);
-    font-family: 'Inter', sans-serif;
-    font-size: 11px;
-    font-weight: 500;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    transition: all .12s;
-    letter-spacing: .02em;
+  width: 100%;
+  height: 28px;
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  background: var(--surface2);
+  color: var(--text-dim);
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: all .12s;
+  letter-spacing: .02em;
 }
 
 .pm-profile-btn:hover {
-    background: var(--border2);
-    color: var(--text);
-    border-color: #444;
+  background: var(--border2);
+  color: var(--text);
+  border-color: #444;
 }

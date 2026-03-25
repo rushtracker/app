@@ -3,80 +3,80 @@ const { request } = require('https');
 
 
 module.exports = class IpcHandler {
-    #store;
+  #store;
 
-    constructor(getWindow, handler, sendUpdate, store, sendNotification) {
-        this.#store           = store;
-        
-        this.getWindow        = getWindow;
-        this.handler          = handler;
-        this.sendUpdate       = sendUpdate;
-        this.sendNotification = sendNotification;
+  constructor(getWindow, handler, sendUpdate, store, sendNotification) {
+    this.#store           = store;
+    
+    this.getWindow        = getWindow;
+    this.handler          = handler;
+    this.sendUpdate       = sendUpdate;
+    this.sendNotification = sendNotification;
 
-        this.#register();
+    this.#register();
 
-        if (!app.isPackaged) this.#registerDev();
-    }
+    if (!app.isPackaged) this.#registerDev();
+  }
 
-    #fetchPlayer(username) {
-        return new Promise((resolve, reject) => {
-            const req = request({
-                hostname: process.env.API_HOSTNAME,
-                path:     `/api/player/${encodeURIComponent(username)}`,
-                method:   'GET',
-                headers:  {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                    'Accept':     '*/*',
-                    'Referer':    `https://${process.env.API_HOSTNAME}/joueur?name=${username}`,
-                },
-            }, (res) => {
-                if (res.statusCode !== 200) return reject(new Error(`HTTP ${res.statusCode}`));
+  #fetchPlayer(username) {
+    return new Promise((resolve, reject) => {
+      const req = request({
+        hostname: process.env.API_HOSTNAME,
+        path:     `/api/player/${encodeURIComponent(username)}`,
+        method:   'GET',
+        headers:  {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Accept':     '*/*',
+          'Referer':    `https://${process.env.API_HOSTNAME}/joueur?name=${username}`,
+        },
+      }, (res) => {
+        if (res.statusCode !== 200) return reject(new Error(`HTTP ${res.statusCode}`));
 
-                let raw = '';
-                res.on('data', (chunk) => raw += chunk);
-                res.on('end',  () => {
-                    try {
-                        resolve(JSON.parse(raw));
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-            });
-
-            req.setTimeout(10000, () => req.destroy());
-            req.on('error', reject);
-            req.end();
+        let raw = '';
+        res.on('data', (chunk) => raw += chunk);
+        res.on('end',  () => {
+          try {
+            resolve(JSON.parse(raw));
+          } catch (e) {
+            reject(e);
+          }
         });
-    }
+      });
 
-    #register() {
-        ipcMain.on('window:minimize',    () => this.getWindow()?.minimize());
-        ipcMain.on('window:close',       () => this.getWindow()?.close());
-        ipcMain.handle('app:version',    () => app.getVersion());
-        ipcMain.on('shell:openExternal', (_e, url) => shell.openExternal(url));
+      req.setTimeout(10000, () => req.destroy());
+      req.on('error', reject);
+      req.end();
+    });
+  }
 
-        ipcMain.on('game:delete', (_e, id) => {
-            this.#store.remove(id);
-            this.sendUpdate();
-            this.sendNotification('partie enregistrée', `identifiant: ${id}`);
-        });
+  #register() {
+    ipcMain.on('window:minimize',    () => this.getWindow()?.minimize());
+    ipcMain.on('window:close',       () => this.getWindow()?.close());
+    ipcMain.handle('app:version',    () => app.getVersion());
+    ipcMain.on('shell:openExternal', (_e, url) => shell.openExternal(url));
 
-        ipcMain.on('game:stop', async () => {
-            if (this.handler.game.started) await this.handler.save();
+    ipcMain.on('game:delete', (_e, id) => {
+      this.#store.remove(id);
+      this.sendUpdate();
+      this.sendNotification('partie enregistrée', `identifiant: ${id}`);
+    });
 
-            await this.handler.reset();
+    ipcMain.on('game:stop', async () => {
+      if (this.handler.game.started) await this.handler.save();
 
-            this.sendUpdate();
-        });
+      await this.handler.reset();
 
-        ipcMain.handle('player:fetch', (_e, username) => this.#fetchPlayer(username).catch(() => null));
-    }
+      this.sendUpdate();
+    });
 
-    #registerDev() {
-        const Simulator = require('../../tests/Simulator');
-        const sim       = new Simulator(this.handler, this.sendUpdate);
+    ipcMain.handle('player:fetch', (_e, username) => this.#fetchPlayer(username).catch(() => null));
+  }
 
-        ipcMain.on('sim:start', () => sim.start());
-        ipcMain.on('sim:stop',  () => sim.stop());
-    }
+  #registerDev() {
+    const Simulator = require('../../tests/Simulator');
+    const sim       = new Simulator(this.handler, this.sendUpdate);
+
+    ipcMain.on('sim:start', () => sim.start());
+    ipcMain.on('sim:stop',  () => sim.stop());
+  }
 }
