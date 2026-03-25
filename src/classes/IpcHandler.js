@@ -58,7 +58,7 @@ module.exports = class IpcHandler {
         ipcMain.on('game:delete', (_e, id) => {
             this.#store.remove(id);
             this.sendUpdate();
-            this.sendNotification('deleted');
+            this.sendNotification('partie enregistrée', `identifiant: ${id}`);
         });
 
         ipcMain.on('game:stop', async () => {

@@ -16,11 +16,8 @@ export default class Notifier {
         this.#container = document.getElementById('notif-container');
     }
 
-    push(type, data = {}) {
-        const entry = MESSAGES[type];
-        if (!entry) return;
-
-        const { message, sub } = typeof entry === 'function' ? entry(data) : entry;
+    push(message, sub) {
+        if (!message) return;
 
         this.#spawn(message, sub);
     }

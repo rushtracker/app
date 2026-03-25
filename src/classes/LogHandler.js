@@ -81,7 +81,7 @@ module.exports = class LogHandler extends EventEmitter {
                     await this.setGameMode('spectator');
                     await this.fixPlayer(username);
 
-                    this.emit('notification:push', { type: 'spectator', data: {} });
+                    this.emit('notification:push', { message: 'mode spectateur' });
                 }
             },
             {
@@ -165,8 +165,6 @@ module.exports = class LogHandler extends EventEmitter {
 
                     await this.setTeam(username, TEAM_LIST.find((t) => t !== TEAMS[team.toLowerCase()]));
                     await this.setBreaker(username);
-
-                    this.emit('notification:push', { type: 'bedDestroyed', data: { username } });
                 }
             },
             {
@@ -229,7 +227,7 @@ module.exports = class LogHandler extends EventEmitter {
     async setLobby(value) {
         this.game.lobby = value;
 
-        if (value) this.emit('notification:push', { type: 'lobby', data: {} });
+        if (value) this.emit('notification:push', { message: 'partie détectée', sub: this.game.mode.label });
 
         this.#logger.log('lobby rejoint');
 
@@ -247,7 +245,7 @@ module.exports = class LogHandler extends EventEmitter {
     async startGame() {
         this.game.started = true;
 
-        if (!this.game.spectator) this.emit('notification:push', { type: 'started', data: {} });
+        if (!this.game.spectator) this.emit('notification:push', { message: 'partie commencée', sub: this.game.mode.label });
 
         this.#logger.log('partie démarrée');
     }
@@ -321,6 +319,8 @@ module.exports = class LogHandler extends EventEmitter {
         const player = await this.fixPlayer(username);
 
         player.breaker = true;
+
+        this.emit('notification:push', { message: 'lit adverse détruit', sub: `par ${username}` });
 
         this.#logger.log(`casseur: ${username}`);
 
@@ -423,8 +423,10 @@ module.exports = class LogHandler extends EventEmitter {
     }
 
     async save() {
+        const id = Date.now();
+
         const entry = {
-            id:        Date.now(),
+            id,
             mode:      this.game.mode,
             state:     this.game.state,
             winner:    this.game.winner,
@@ -440,7 +442,7 @@ module.exports = class LogHandler extends EventEmitter {
         this.#logger.log(`partie sauvegardée (id: ${entry.id})`);
 
         this.emit('game:saved', entry);
-        this.emit('notification:push', { type: 'saved', data: {} });
+        this.emit('notification:push', { message: 'partie sauvegardée', sub: `identifiant: ${id}` });
 
         await this.reset();
 

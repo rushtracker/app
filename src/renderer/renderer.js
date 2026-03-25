@@ -18,7 +18,8 @@ const contextMenu = new ContextMenu(
     (id) => {
         window.api.deleteGame(id);
         if (viewingGameId === id) viewingGameId = null;
-    }
+    },
+    () => notifier.push('copié dans le presse-papier')
 );
 
 const history = new History(
@@ -107,5 +108,5 @@ if (window.api) {
         refresh();
     });
 
-    window.api.onNotification(({ type, data }) => notifier.push(type, data));
+    window.api.onNotification(({ message, sub }) => notifier.push(message, sub));
 }

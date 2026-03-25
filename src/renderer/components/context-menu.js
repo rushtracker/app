@@ -6,15 +6,16 @@ export default class ContextMenu {
     #deleteBtn;
     #exportBtn;
     #exportFn  = null;
+    #onNotify;
     #targetId  = null;
     #isCurrent = false;
 
-    constructor(onStop, onDelete) {
+    constructor(onStop, onDelete, onNotify) {
         this.#el        = document.getElementById('ctx-menu');
         this.#stopBtn   = document.getElementById('ctx-stop');
         this.#deleteBtn = document.getElementById('ctx-delete');
-
         this.#exportBtn = document.getElementById('ctx-export');
+        this.#onNotify  = onNotify;
 
         this.#stopBtn.addEventListener('click', () => {
             onStop();
@@ -28,6 +29,7 @@ export default class ContextMenu {
 
         this.#exportBtn.addEventListener('click', () => {
             this.#exportFn?.();
+            this.#onNotify?.();
             this.hide();
         });
 

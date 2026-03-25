@@ -31,8 +31,8 @@ function sendUpdate() {
     });
 }
 
-function sendNotification(type, data = {}) {
-    mainWindow?.webContents.send('notification:push', { type, data });
+function sendNotification(message, sub) {
+    mainWindow?.webContents.send('notification:push', { message, sub });
 }
 
 function createTray() {
@@ -119,7 +119,7 @@ app.whenReady().then(() => {
     });
 
     handler.on('game:saved',    sendUpdate);
-    handler.on('notification:push', ({ type, data }) => sendNotification(type, data));
+    handler.on('notification:push', ({ message, sub }) => sendNotification(message, sub));
 
     watcher.start();
 
