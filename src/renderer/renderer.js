@@ -23,10 +23,17 @@ const contextMenu = new ContextMenu(
 
 const history = new History(
     (id) => id === 'current' ? viewCurrent() : selectGame(id),
-    (e, id) => contextMenu.show(e, id)
+    (e, id) => {
+        const game = id !== 'current' ? (lastData?.games || []).find((g) => g.id === id) : null;
+        contextMenu.showForGame(e, id, game);
+    }
 );
 
-const players = new Players((username) => playerModal.show(username));
+const players = new Players(
+    (username) => playerModal.show(username),
+    (e, player, allPlayers) => contextMenu.showForPlayer(e, player, allPlayers)
+);
+
 const sidebar = new Sidebar(() => viewCurrent());
 
 function getEtat(game) {

@@ -1,20 +1,26 @@
-import { kd } from './utils.js';
+import { kd, kdVal, bestPlayer } from './utils.js';
 
 export default class Players {
     #el;
-    #rows       = new Map();
-    #lastGameId = null;
+    #rows           = new Map();
+    #lastGameId     = null;
+    #currentPlayers = [];
 
-    constructor(onPlayerClick) {
+    constructor(onPlayerClick, onPlayerContextMenu) {
         this.#el = document.getElementById('player-rows');
+
         this.#el.addEventListener('click', (e) => {
             const row = e.target.closest('.row');
             if (row) onPlayerClick(row.dataset.username);
         });
-    }
 
-    #kdVal(p) {
-        return p.deaths === 0 ? p.kills : p.kills / p.deaths;
+        this.#el.addEventListener('contextmenu', (e) => {
+            const row = e.target.closest('.row');
+            if (!row) return;
+
+            const player = this.#currentPlayers.find((p) => p.username === row.dataset.username);
+            if (player) onPlayerContextMenu(e, player, this.#currentPlayers);
+        });
     }
 
     #sort(players, self) {
@@ -26,15 +32,11 @@ export default class Players {
             const td  = (order[a.team] ?? 2) - (order[b.team] ?? 2);
             if (td  !== 0) return td;
 
-            const kdd = this.#kdVal(b) - this.#kdVal(a);
+            const kdd = kdVal(b) - kdVal(a);
             if (kdd !== 0) return kdd;
 
             return a.username.localeCompare(b.username);
         });
-    }
-
-    #best(players) {
-        return players.reduce((a, b) => this.#kdVal(b) > this.#kdVal(a) ? b : a);
     }
 
     #makeRow(p, self, isBest, delay = 0) {
@@ -107,6 +109,8 @@ export default class Players {
         }
 
         if (!players?.length) {
+            this.#currentPlayers = [];
+
             if (!this.#el.querySelector('.empty-state')) {
                 this.#clear();
                 this.#showEmpty();
@@ -116,7 +120,9 @@ export default class Players {
         }
 
         const sorted = this.#sort(players, self);
-        const bestP  = this.#best(sorted);
+        const bestP  = bestPlayer(sorted);
+
+        this.#currentPlayers = sorted;
 
         this.#el.querySelector('.empty-state')?.remove();
 
@@ -124,7 +130,7 @@ export default class Players {
             this.#clear();
 
             sorted.forEach((p, i) => {
-                const entry = this.#makeRow(p, self, p.username === bestP.username, i * 25);
+                const entry = this.#makeRow(p, self, p.username === bestP?.username, i * 25);
                 this.#el.appendChild(entry.el);
                 this.#rows.set(p.username, entry);
             });
@@ -142,7 +148,7 @@ export default class Players {
         }
 
         sorted.forEach((p, i) => {
-            const isBest = p.username === bestP.username;
+            const isBest = p.username === bestP?.username;
 
             if (this.#rows.has(p.username)) {
                 this.#updateRow(this.#rows.get(p.username), p, isBest);
