@@ -46,6 +46,14 @@ module.exports = class LogHandler extends EventEmitter {
         }
       },
       {
+        regex: /Disconnecting/u,
+        run: async () => {
+          if (!this.self || !this.game.started) return;
+          
+          await this.addDeath(this.self);
+        }
+      },
+      {
         regex: /\[Rush\] (?:\+ )?(\w+) s'est (re)?connecté/u,
         run: async ([, username]) => {
           if (!this.game.lobby && !this.game.spectator) return;
