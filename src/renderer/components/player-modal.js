@@ -53,7 +53,7 @@ export default class PlayerModal {
     document.getElementById('pm-losses').textContent  = rush.losses.toLocaleString('fr-FR');
     document.getElementById('pm-kills').textContent   = rush.kills.toLocaleString('fr-FR');
     document.getElementById('pm-deaths').textContent  = rush.deaths.toLocaleString('fr-FR');
-    document.getElementById('pm-ks').textContent  = rush.currentKillStreak.toLocaleString('fr-FR');
+    document.getElementById('pm-ks').textContent      = rush.currentKillStreak.toLocaleString('fr-FR');
     document.getElementById('pm-time').textContent    = `${fmtTime(rush.timePlayed)}h`;
     
     this.#setState('content');
