@@ -27,7 +27,6 @@ module.exports = async ({ appOutDir }) => {
   extractAll(asarPath, extractPath);
 
   await walkDir(extractPath);
-
   await createPackage(extractPath, asarPath);
   await rm(extractPath, { recursive: true, force: true });
 };
