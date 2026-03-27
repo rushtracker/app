@@ -180,10 +180,10 @@ module.exports = class Updater extends EventEmitter {
 
       writeFileSync(batchPath, batch, 'utf8');
 
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       const child = spawn('cmd.exe', ['/c', 'start', '""', 'cmd.exe', '/c', batchPath], { detached: true, stdio: 'ignore', shell: true });
       child.unref();
-
-      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       app.exit(0);
     } catch (e) {
