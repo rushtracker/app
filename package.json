@@ -6,6 +6,10 @@
     "start": "chcp 65001 > nul && electron .",
     "build": "electron-builder"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/djaana/rush-tracker.git"
+  },
   "build": {
     "appId": "com.rush.tracker",
     "productName": "rush-tracker",
