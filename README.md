@@ -14,56 +14,63 @@
 </div>
 
 <details>
-  <summary>Sommaire</summary>
+  <summary>sommaire</summary>
   <ol>
     <li>
-      <a href="#à-propos">À propos</a>
+      <a href="#à-propos">à propos</a>
     </li>
     <li>
-      <a href="#démarrer">Démarrer</a>
+      <a href="#démarrer">démarrer</a>
       <ul>
-        <li><a href="#prérequis">Prérequis</a></li>
-        <li><a href="#installation">Installation</a></li>
+        <li><a href="#prérequis">prérequis</a></li>
+        <li><a href="#installation">installation</a></li>
       </ul>
+    </li>
+    <li>
+      <a href="#crédits">crédits</a>
     </li>
   </ol>
 </details>
 
-## À propos
+## à propos
 
-minecraft rush statistics tracker
+retracez les statistiques des joueurs dans vos parties
 
 <p align="right"><a href="#readme-top">retour en haut</a></p>
 
-## Démarrer
+## démarrer
 
-Ceci est une liste d'instruction si vous souhaitez exécuter le projet en local.
-Il est important de rappeler que l'utilisation du code source de rush tracker est soumise à des droits d'auteur.
+ceci est une liste d'instruction si vous souhaitez exécuter le projet en local
+il est important de rappeler que l'utilisation du code source de rush tracker est soumise à des droits d'auteur
 
-### Prérequis
+### prérequis
 
-Voici la liste des prérequis afin d'exécuter le projet en local.
+voici la liste des prérequis afin d'exécuter le projet en local
 * [Node](https://nodejs.org/en/) - 18.20.8
 * [NPM](https://www.npmjs.com/) - 10.8.2
 
-### Installation
+### installation
 
-Voici la liste des étapes à suivre afin d'exécuter le projet.
+voici la liste des étapes à suivre afin d'exécuter le projet
 
-1. Cloner le répertoire
+1. cloner le répertoire
    ```sh
    git clone https://github.com/djaana/rush-tracker.git
    ```
-2. Installer les dépendances NPM
+2. installer les dépendances NPM
    ```sh
    npm install
    ```
-3. Exécuter le code
+3. exécuter le code
    ```sh
    npm run start
    ```
 
 <p align="right"><a href="#readme-top">retour en haut</a></p>
+
+## crédits
+
+- blaye. @discord
 
 <p align="center"><a href="https://github.com/djaana/rush-tracker/blob/main/LICENSE">2026 © rush tracker</a></p>
 
