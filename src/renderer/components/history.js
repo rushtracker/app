@@ -1,4 +1,4 @@
-import { formatDate, addWeeks, addMonths } from './utils.js';
+import { formatDate, startOfToday, startOfWeekAgo, startOfMonthAgo } from './utils.js';
 
 export default class History {
   #el;
@@ -51,16 +51,11 @@ export default class History {
       if (this.#filterResult && g.mode?.name === 'spectator') return false;
 
       if (this.#filterDate) {
-        const date = new Date(g.id);
-        const now  = new Date();
+        const ts = g.id;
 
-        if (this.#filterDate === 'today') {
-          if (date.toDateString() !== now.toDateString()) return false;
-        } else if (this.#filterDate === 'week') {
-          if (date < date - addWeeks(date, 1)) return false;
-        } else if (this.#filterDate === 'month') {
-          if (date < date - addMonths(date, 1)) return false;
-        }
+        if (this.#filterDate === 'today' && ts < startOfToday())    return false;
+        if (this.#filterDate === 'week'  && ts < startOfWeekAgo())  return false;
+        if (this.#filterDate === 'month' && ts < startOfMonthAgo()) return false;
       }
 
       return true;
@@ -69,7 +64,7 @@ export default class History {
 
   #rerender() {
     if (this.#lastGame === null) return;
-    this.#renderInternal(this.#lastGame, this.#lastGames, this.#lastViewing);
+    this.#renderInternal(this.#lastGame, this.#lastGames, this.#lastViewing, false);
   }
 
   #buildCurrentCard(game) {
@@ -132,12 +127,12 @@ export default class History {
     this.#lastGame    = game;
     this.#lastGames   = games;
     this.#lastViewing = viewingGameId;
-    this.#renderInternal(game, games, viewingGameId);
+    this.#renderInternal(game, games, viewingGameId, true);
   }
 
-  #renderInternal(game, games, viewingGameId) {
-    const isFirst = this.#isFirst;
-    this.#isFirst = false;
+  #renderInternal(game, games, viewingGameId, animate = true) {
+    const isFirst = animate && this.#isFirst;
+    if (animate) this.#isFirst = false;
 
     const filteredGames = this.#filterGames(games);
 
@@ -148,8 +143,13 @@ export default class History {
     for (const [id, el] of [...this.#cards]) {
       if (!incoming.has(id)) {
         this.#cards.delete(id);
-        el.classList.add('card-exit');
-        el.addEventListener('animationend', () => el.remove(), { once: true });
+
+        if (animate) {
+          el.classList.add('card-exit');
+          el.addEventListener('animationend', () => el.remove(), { once: true });
+        } else {
+          el.remove();
+        }
       }
     }
 
@@ -168,9 +168,11 @@ export default class History {
         const el = id === 'current' ? this.#buildCurrentCard(data) : this.#buildCard(data);
 
         this.#setClass(el, id, viewingGameId);
-        el.classList.add('card-enter');
 
-        if (isFirst) el.style.animationDelay = `${newIdx * 40}ms`;
+        if (animate) {
+          el.classList.add('card-enter');
+          if (isFirst) el.style.animationDelay = `${newIdx * 40}ms`;
+        }
 
         let anchor = null;
         for (let j = i + 1; j < incomingKeys.length; j++) {

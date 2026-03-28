@@ -63,16 +63,22 @@ export function exportGame(game) {
   return lines.join('\n');
 }
 
-export function addWeeks(date = Date.now(), weeks) {
-  const result = new Date(date);
-  result.setDate(result.getDate() + (weeks * 7));
-
-  return result.getTime();
+export function startOfWeekAgo() {
+  const d = new Date();
+  d.setDate(d.getDate() - 7);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
 }
 
-export function addMonths(date = Date.now(), months) {
-  const result = new Date(date);
-  result.setMonth(result.getDate() + months);
-  
-  return result.getTime();
+export function startOfMonthAgo() {
+  const d = new Date();
+  d.setMonth(d.getMonth() - 1);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+}
+
+export function startOfToday() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
 }
