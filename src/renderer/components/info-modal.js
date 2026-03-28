@@ -14,7 +14,7 @@ export default class InfoModal {
       window.api?.openExternal('https://discord.gg/mWF6wqARdP');
     });
     document.getElementById('link-github').addEventListener('click',     () => {
-      window.api?.openExternal('https://github.com/djaana/rush-tracker');
+      window.api?.openExternal('https://github.com/rushtracker/app');
     });
   }
 

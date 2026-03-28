@@ -6,7 +6,7 @@
 
 <br />
 <div align="center">
-  <a href="https://github.com/djaana/rush-tracker">
+  <a href="https://github.com/rushtracker/app">
     <img src="app.ico" alt="Logo" width="128" height="128">
   </a>
 
@@ -55,7 +55,7 @@ voici la liste des étapes à suivre afin d'exécuter le projet
 
 1. cloner le répertoire
    ```sh
-   git clone https://github.com/djaana/rush-tracker.git
+   git clone https://github.com/rushtracker/app.git
    ```
 2. installer les dépendances NPM
    ```sh
@@ -72,11 +72,11 @@ voici la liste des étapes à suivre afin d'exécuter le projet
 
 - blaye. @discord
 
-<p align="center"><a href="https://github.com/djaana/rush-tracker/blob/main/LICENSE">2026 © rush tracker</a></p>
+<p align="center"><a href="https://github.com/rushtracker/app/blob/main/LICENSE">2026 © rush tracker</a></p>
 
-[contributors-shield]: https://img.shields.io/github/contributors/djaana/rush-tracker.svg?style=for-the-badge
-[contributors-url]: https://github.com/djaana/rush-tracker/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/djaana/rush-tracker.svg?style=for-the-badge
-[forks-url]: https://github.com/djaana/rush-tracker/network/members
-[stars-shield]: https://img.shields.io/github/stars/djaana/rush-tracker.svg?style=for-the-badge
-[stars-url]: https://github.com/djaana/rush-tracker/stargazers
+[contributors-shield]: https://img.shields.io/github/contributors/rushtracker/app.svg?style=for-the-badge
+[contributors-url]: https://github.com/rushtracker/app/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/rushtracker/app.svg?style=for-the-badge
+[forks-url]: https://github.com/rushtracker/app/network/members
+[stars-shield]: https://img.shields.io/github/stars/rushtracker/app.svg?style=for-the-badge
+[stars-url]: https://github.com/rushtracker/app/stargazers
