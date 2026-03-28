@@ -27,6 +27,7 @@ let mainWindow;
 let tray;
 let quit;
 let notif;
+let pendingUpdate = null;
 
 function sendUpdate() {
   mainWindow?.webContents.send('game:update', {
@@ -83,7 +84,15 @@ function createWindow() {
   });
 
   mainWindow.loadFile(join(__dirname, 'src', 'renderer', 'index.html'));
-  mainWindow.webContents.once('did-finish-load', sendUpdate);
+
+  mainWindow.webContents.once('did-finish-load', () => {
+    sendUpdate();
+
+    if (pendingUpdate) {
+      mainWindow.webContents.send('update:available', pendingUpdate);
+      pendingUpdate = null;
+    }
+  });
 
   mainWindow.on('close', (e) => {
     if (quit || !settings.get('tray')) return app.quit();
@@ -104,7 +113,7 @@ function createWindow() {
 
   mainWindow.webContents.on('before-input-event', (e, input) => {
     if (!app.isPackaged) return;
-    
+
     if (input.key === 'F12' || (input.control && input.shift && input.key === 'I')) e.preventDefault();
   });
 
@@ -121,7 +130,7 @@ app.commandLine.appendSwitch('disable-backgrounding-occluded-windows');
 
 app.whenReady().then(() => {
   createWindow();
-  
+
   if (settings.get('tray')) createTray();
 
   const watcher = new LogWatcher(join(process.env.APPDATA, process.env.LOG_SUBPATH));
@@ -138,7 +147,11 @@ app.whenReady().then(() => {
   handler.on('notification:push', ({ message, sub }) => sendNotification(message, sub));
 
   updater.on('update:available', ({ version, downloadUrl }) => {
-    mainWindow?.webContents.send('update:available', { version, downloadUrl });
+    if (!mainWindow?.webContents.isLoading()) {
+      mainWindow?.webContents.send('update:available', { version, downloadUrl });
+    } else {
+      pendingUpdate = { version, downloadUrl };
+    }
   });
 
   updater.start();
