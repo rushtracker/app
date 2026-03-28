@@ -150,7 +150,7 @@ module.exports = class Updater extends EventEmitter {
         '@echo off',
         'chcp 65001 > nul',
         'title mise à jour en cours...',
-        
+
         'echo \x1b[94m===============================\x1b[0m',
         'echo \x1b[93m   mise à jour de l\'application\x1b[0m',
         'echo \x1b[94m===============================\x1b[0m',
@@ -171,7 +171,7 @@ module.exports = class Updater extends EventEmitter {
 
         'echo.',
         'echo \x1b[92m[+] remplacement réussi !\x1b[0m',
-        
+
         `del /f /q "${newExe}"`,
         'echo \x1b[90m[*] nettoyage terminé\x1b[0m',
 
