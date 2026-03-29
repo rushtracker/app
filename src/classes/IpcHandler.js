@@ -9,72 +9,53 @@ module.exports = class IpcHandler {
   #tray;
 
   constructor(getWindow, handler, sendUpdate, store, sendNotification, settings, updater, tray) {
-    this.getWindow        = getWindow;
-    this.handler          = handler;
-    this.sendUpdate       = sendUpdate;
+    this.getWindow = getWindow;
+    this.handler = handler;
+    this.sendUpdate = sendUpdate;
     this.sendNotification = sendNotification;
 
-    this.#store    = store;
+    this.#store = store;
     this.#settings = settings;
-    this.#updater  = updater;
-    this.#tray     = tray;
+    this.#updater = updater;
+    this.#tray = tray;
 
     this.#register();
 
     if (!app.isPackaged) this.#registerDev();
   }
 
-  #fetchPlayer(username) {
-    return new Promise((resolve, reject) => {
-      const req = request({
-        hostname: process.env.SERVER_API_HOSTNAME,
-        path:     `/api/player/${encodeURIComponent(username)}`,
-        method:   'GET',
-        headers:  {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-          'Accept':     '*/*'
-        },
-      }, (res) => {
-        if (res.statusCode !== 200) return reject(new Error(`HTTP ${res.statusCode}`));
+  async #fetchPlayer(username) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
 
-        let raw = '';
-        res.on('data', (chunk) => raw += chunk);
-        res.on('end',  () => {
-          try { resolve(JSON.parse(raw)); } catch (e) { reject(e); }
-        });
-      });
-
-      req.setTimeout(10000, () => req.destroy());
-      req.on('error', reject);
-      req.end();
+    const res = await fetch(`https://${process.env.SERVER_HOSTNAME}${process.env.SERVER_API_PATH}?action=player&name=${username}`, {
+      signal: controller.signal
     });
+    clearTimeout(timeout);
+    
+    return {
+      code: res.status,
+      data: await res.json()
+    };
   }
 
-  #searchPlayers(query) {
-    return new Promise((resolve, reject) => {
-      const req = request({
-        hostname: process.env.SERVER_API_HOSTNAME,
-        path:     `/api/players?search=${encodeURIComponent(query)}`,
-        method:   'GET',
-        headers:  {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-          'Accept':     '*/*'
-        },
-      }, (res) => {
-        if (res.statusCode !== 200) return reject(new Error(`HTTP ${res.statusCode}`));
+  async #searchPlayers(query) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
 
-        let raw = '';
-
-        res.on('data', (chunk) => raw += chunk);
-        res.on('end',  () => {
-          try { resolve(JSON.parse(raw)); } catch (e) { reject(e); }
-        });
-      });
-
-      req.setTimeout(10000, () => req.destroy());
-      req.on('error', reject);
-      req.end();
+    const res = await fetch(`https://${process.env.SERVER_HOSTNAME}${process.env.SERVER_API_PATH}?action=players&search=${query}`, {
+      signal: controller.signal
     });
+    clearTimeout(timeout);
+    
+    return {
+      code: res.status,
+      data: await res.json()
+    };
+  }
+
+  #getPlayerPage(username) {
+    return `https://${process.env.SERVER_HOSTNAME}${process.env.SERVER_PLAYER_PATH}${username}`;
   }
 
   #register() {
@@ -99,7 +80,8 @@ module.exports = class IpcHandler {
     });
 
     ipcMain.handle('player:fetch',   (_e, username) => this.#fetchPlayer(username).catch(() => null));
-    ipcMain.handle('players:search', (_e, query)    => this.#searchPlayers(query).catch(() => null));
+    ipcMain.handle('players:search', (_e, query) => this.#searchPlayers(query).catch(() => null));
+    ipcMain.handle('player:get',     (_e, username) => this.#getPlayerPage(username));
 
     ipcMain.handle('settings:get', () => this.#settings.get());
 
@@ -114,9 +96,9 @@ module.exports = class IpcHandler {
     });
 
     ipcMain.on('update:install', (_e, downloadUrl) => {
-      const win        = this.getWindow();
+      const win = this.getWindow();
       const onProgress = (data) => win?.webContents.send('download:progress', data);
-      const onError    = ()     => win?.webContents.send('update:error');
+      const onError = () => win?.webContents.send('update:error');
 
       this.#updater.on('download:progress', onProgress);
       this.#updater.once('update:error', onError);
@@ -130,7 +112,7 @@ module.exports = class IpcHandler {
 
   #registerDev() {
     const Simulator = require('../../tests/Simulator');
-    const sim       = new Simulator(this.handler, this.sendUpdate);
+    const sim = new Simulator(this.handler, this.sendUpdate);
 
     ipcMain.on('sim:start', () => sim.start());
     ipcMain.on('sim:stop',  () => sim.stop());

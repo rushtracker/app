@@ -35,6 +35,7 @@ contextBridge.exposeInMainWorld('api', {
   close:          () => ipcRenderer.send('window:close'),
   fetchPlayer:    (username) => ipcRenderer.invoke('player:fetch', username),
   searchPlayers:  (query) => ipcRenderer.invoke('players:search', query),
+  getPlayerPage:  (username) => ipcRenderer.invoke('player:get', username),
   getSettings:    () => ipcRenderer.invoke('settings:get'),
   setSetting:     (key, value) => ipcRenderer.invoke('settings:set', key, value),
   installUpdate:  (downloadUrl) => ipcRenderer.send('update:install', downloadUrl),

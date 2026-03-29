@@ -5,9 +5,9 @@ export default class SearchModal {
   #onPlayerClick;
 
   constructor(onPlayerClick) {
-    this.#overlay      = document.getElementById('search-modal');
-    this.#input        = document.getElementById('srch-input');
-    this.#results      = document.getElementById('srch-results');
+    this.#overlay = document.getElementById('search-modal');
+    this.#input = document.getElementById('srch-input');
+    this.#results = document.getElementById('srch-results');
     this.#onPlayerClick = onPlayerClick;
 
     this.#overlay.addEventListener('click', (e) => {
@@ -27,26 +27,36 @@ export default class SearchModal {
 
     this.#setState('loading');
 
-    const results = await window.api.searchPlayers(username);
+    const res = await window.api.searchPlayers(username);
+    const code = res?.code;
 
-    if (!results?.length) {
-      this.#setState('empty');
-      return;
+    switch(code) {
+      case 200:
+        break;
+      case 429:
+        return this.#setState('ratelimit');
+      default:
+        return this.#setState('error');
     }
+
+    const results = res?.data;
+    if (!results.length) return this.#setState('empty');
+
 
     this.#results.innerHTML = '';
 
-    results.forEach(({ name }) => {
+    results.forEach((username) => {
       const row = document.createElement('div');
       row.className = 'srch-row';
       row.innerHTML = `
-        <img class="srch-avatar" src="https://mc-heads.net/avatar/${name}" onerror="this.style.opacity='0'" />
-        <span class="srch-name">${name}</span>
+        <img class="srch-avatar" src="https://mc-heads.net/avatar/${username}" onerror="this.style.opacity='0'" />
+        <span class="srch-name">${username}</span>
       `;
       row.addEventListener('click', () => {
         this.close();
-        this.#onPlayerClick(name);
+        this.#onPlayerClick(username);
       });
+
       this.#results.appendChild(row);
     });
 
@@ -54,9 +64,20 @@ export default class SearchModal {
   }
 
   #setState(state) {
-    document.getElementById('srch-loading').style.display = state === 'loading' ? '' : 'none';
-    document.getElementById('srch-empty').style.display   = state === 'empty'   ? '' : 'none';
-    this.#results.style.display                            = state === 'results' ? '' : 'none';
+    const states = [
+      'loading',
+      'empty',
+      'ratelimit',
+      'error',
+      'results'
+    ];
+
+    states.forEach((s) => {
+      const el = document.getElementById(`srch-${s}`);
+      if (!el) return;
+
+      el.style.display = s === state ? '' : 'none';
+    });
   }
 
   open() {

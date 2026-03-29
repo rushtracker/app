@@ -197,6 +197,8 @@
         <span>chargement...</span>
       </div>
       <div id="srch-empty" class="srch-state" style="display:none">aucun résultat</div>
+      <div id="srch-ratelimit" class="srch-state" style="display:none">trop de requêtes, veuillez ralentir</div>
+      <div id="srch-error" class="srch-state" style="display:none">une erreur est survenue</div>
       <div id="srch-results"></div>
     </div>
     <div class="modal-footer">2026 © rush tracker</div>
@@ -272,8 +274,16 @@
       <span>chargement...</span>
     </div>
 
-    <div id="pm-error" class="pm-error" style="display:none">
+    <div id="pm-unknown" class="pm-error" style="display:none">
       <span>joueur introuvable</span>
+    </div>
+
+    <div id="pm-ratelimit" class="pm-error" style="display:none">
+      <span>trop de requêtes, veuillez ralentir</span>
+    </div>
+
+    <div id="pm-error" class="pm-error" style="display:none">
+      <span>une erreur est survenue</span>
     </div>
 
     <div id="pm-content" class="pm-content" style="display:none">
