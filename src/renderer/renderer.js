@@ -56,6 +56,19 @@ function getEtat(game) {
   return 'hub';
 }
 
+function getPlayers() {
+  window.api.fetchPlayers().then((res) => {
+    const el = document.getElementById('s-players');
+
+    const code = res?.code;
+    if (code !== 200) return el.textContent = '—';
+
+    const data = res?.data;
+
+    document.getElementById('s-players').textContent = data?.players;
+  });
+}
+
 function refresh() {
   if (!lastData) return;
 
@@ -102,11 +115,6 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-window.api.fetchPlayers().then((r) => {
-  console.log(r)
-  document.getElementById('s-players').textContent = r.data.players;
-});
-
 window.api.getVersion().then((v) => {
   document.getElementById('s-version').textContent = v;
 });
@@ -125,23 +133,24 @@ window.api.onUpdateAvailable(({ version, downloadUrl }) => {
   updateModal.show(version, downloadUrl);
 });
 
-if (window.api) {
-  window.api.onGameUpdate((data) => {
-    lastData = data;
+window.api.onGameUpdate((data) => {
+  lastData = data;
 
-    const { game, self } = data;
-    const games = data.games || [];
+  const { game, self } = data;
+  const games = data.games || [];
 
-    document.getElementById('s-pseudo').textContent = self || '—';
-    document.getElementById('s-mode').textContent = game.mode?.name || '—';
-    document.getElementById('s-etat').textContent = getEtat(game);
+  document.getElementById('s-pseudo').textContent = self || '—';
+  document.getElementById('s-mode').textContent = game.mode?.name || '—';
+  document.getElementById('s-etat').textContent = getEtat(game);
 
-    if (viewingGameId !== null && !games.some((g) => g.id === viewingGameId)) {
-      viewingGameId = null;
-    }
+  if (viewingGameId !== null && !games.some((g) => g.id === viewingGameId)) {
+    viewingGameId = null;
+  }
 
-    refresh();
-  });
+  refresh();
+});
 
-  window.api.onNotification(({ message, sub }) => notifier.push(message, sub));
-}
+window.api.onNotification(({ message, sub }) => notifier.push(message, sub));
+
+getPlayers();
+setInterval(() => getPlayers(), 10000);
