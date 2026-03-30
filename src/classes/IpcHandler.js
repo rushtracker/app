@@ -54,6 +54,21 @@ module.exports = class IpcHandler {
     };
   }
 
+  async #fetchPlayers() {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+
+    const res = await fetch(`https://${process.env.SERVER_HOSTNAME}${process.env.SERVER_API_PATH}?action=server-status`, {
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+    
+    return {
+      code: res.status,
+      data: await res.json()
+    };
+  }
+
   #getPlayerPage(username) {
     return `https://${process.env.SERVER_HOSTNAME}${process.env.SERVER_PLAYER_PATH}${username}`;
   }
@@ -80,8 +95,10 @@ module.exports = class IpcHandler {
     });
 
     ipcMain.handle('player:fetch', (_e, username) => this.#fetchPlayer(username).catch(() => null));
-    ipcMain.handle('players:search', (_e, query) => this.#searchPlayers(query).catch(() => null));
     ipcMain.handle('player:get', (_e, username) => this.#getPlayerPage(username));
+
+    ipcMain.handle('players:fetch', async () => await this.#fetchPlayers());
+    ipcMain.handle('players:search', (_e, query) => this.#searchPlayers(query).catch(() => null));
 
     ipcMain.handle('settings:get', () => this.#settings.get());
 

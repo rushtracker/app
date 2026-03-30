@@ -102,6 +102,11 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+window.api.fetchPlayers().then((r) => {
+  console.log(r)
+  document.getElementById('s-players').textContent = r.data.players;
+});
+
 window.api.getVersion().then((v) => {
   document.getElementById('s-version').textContent = v;
 });
