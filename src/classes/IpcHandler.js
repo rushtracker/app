@@ -27,7 +27,6 @@ module.exports = class IpcHandler {
     const res = await fetch(`https://${process.env.SERVER_HOSTNAME}${process.env.SERVER_API_PATH}?action=player&name=${username}`, {
       signal: AbortSignal.timeout(10000)
     });
-    clearTimeout(timeout);
     
     return {
       code: res.status,
@@ -39,7 +38,6 @@ module.exports = class IpcHandler {
     const res = await fetch(`https://${process.env.SERVER_HOSTNAME}${process.env.SERVER_API_PATH}?action=players&search=${query}`, {
       signal: AbortSignal.timeout(10000)
     });
-    clearTimeout(timeout);
     
     return {
       code: res.status,
@@ -48,13 +46,9 @@ module.exports = class IpcHandler {
   }
 
   async #fetchPlayers() {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
-
     const res = await fetch(`https://${process.env.SERVER_HOSTNAME}${process.env.SERVER_API_PATH}?action=server-status`, {
-      signal: controller.signal
+      signal: AbortSignal.timeout(10000)
     });
-    clearTimeout(timeout);
     
     return {
       code: res.status,
