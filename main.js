@@ -21,13 +21,17 @@ const settings = new Settings(join(process.env.APPDATA, process.env.STORE_DIR));
 const handler = new LogHandler(store);
 const updater = new Updater(iconPath);
 
-if (!gotLock) return app.quit();
-
 let mainWindow;
 let tray;
 let quit;
 let notif;
 let pendingUpdate = null;
+
+if (!gotLock) return app.quit();
+
+app.commandLine.appendSwitch('disable-renderer-backgrounding');
+app.commandLine.appendSwitch('disable-background-timer-throttling');
+app.commandLine.appendSwitch('disable-backgrounding-occluded-windows');
 
 function sendUpdate() {
   mainWindow?.webContents.send('game:update', {
@@ -45,17 +49,14 @@ function createTray() {
   if (tray) return;
 
   const img = nativeImage.createFromPath(iconPath);
-
   tray = new Tray(img.isEmpty() ? nativeImage.createEmpty() : img);
   tray.setToolTip('rush tracker');
-
   const menu = Menu.buildFromTemplate([{ label: 'quitter', click: () => {
     quit = true;
     app.quit();
   }}]);
 
   tray.setContextMenu(menu);
-
   tray.on('click', () => {
     mainWindow?.show();
     mainWindow?.focus();
@@ -84,7 +85,6 @@ function createWindow() {
   });
 
   mainWindow.loadFile(join(__dirname, 'src', 'renderer', 'index.html'));
-
   mainWindow.webContents.once('did-finish-load', () => {
     sendUpdate();
 
@@ -113,20 +113,14 @@ function createWindow() {
 
   mainWindow.webContents.on('before-input-event', (e, input) => {
     if (!app.isPackaged) return;
-
     if (input.key === 'F12' || (input.control && input.shift && input.key === 'I')) e.preventDefault();
   });
 
   mainWindow.webContents.on('devtools-opened', () => {
     if (!app.isPackaged) return;
-
     mainWindow.webContents.closeDevTools();
   });
 }
-
-app.commandLine.appendSwitch('disable-renderer-backgrounding');
-app.commandLine.appendSwitch('disable-background-timer-throttling');
-app.commandLine.appendSwitch('disable-backgrounding-occluded-windows');
 
 app.whenReady().then(() => {
   createWindow();
@@ -134,7 +128,6 @@ app.whenReady().then(() => {
   if (settings.get('tray')) createTray();
 
   const watcher = new LogWatcher(join(process.env.APPDATA, process.env.LOG_SUBPATH));
-
   watcher.on('log:update', async (logs) => {
     for (const log of logs) {
       await handler.parse(log);
@@ -145,7 +138,6 @@ app.whenReady().then(() => {
 
   handler.on('game:saved', sendUpdate);
   handler.on('notification:push', ({ message, sub }) => sendNotification(message, sub));
-
   updater.on('update:available', ({ version, downloadUrl }) => {
     if (!mainWindow?.webContents.isLoading()) {
       mainWindow?.webContents.send('update:available', { version, downloadUrl });
@@ -163,7 +155,6 @@ app.whenReady().then(() => {
     mainWindow?.show();
     mainWindow?.focus();
   });
-
   app.on('before-quit', () => {
     watcher.stop();
     updater.stop();
