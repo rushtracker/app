@@ -45,7 +45,7 @@ module.exports = class Updater extends EventEmitter {
     const res = await fetch(url, {
       headers: {
         'User-Agent': 'rush-tracker-updater',
-        'Accept':     'application/vnd.github+json'
+        'Accept': 'application/vnd.github+json'
       },
       signal: AbortSignal.timeout(10000)
     });
@@ -62,12 +62,12 @@ module.exports = class Updater extends EventEmitter {
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-    const total     = parseInt(res.headers.get('content-length') || '0', 10);
-    let received    = 0;
-    let startTime   = Date.now();
-    let lastEmit    = 0;
+    const total = parseInt(res.headers.get('content-length') || '0', 10);
+    let received = 0;
+    let startTime = Date.now();
+    let lastEmit = 0;
 
-    const file   = createWriteStream(dest);
+    const file = createWriteStream(dest);
     const reader = res.body.getReader();
 
     try {
@@ -86,8 +86,8 @@ module.exports = class Updater extends EventEmitter {
             lastEmit = now;
 
             const elapsed = (now - startTime) / 1000;
-            const rate    = elapsed > 0 ? received / elapsed : 0;
-            const eta     = rate > 0 ? Math.ceil((total - received) / rate) : 0;
+            const rate = elapsed > 0 ? received / elapsed : 0;
+            const eta = rate > 0 ? Math.ceil((total - received) / rate) : 0;
 
             this.emit('download:progress', { received, total, percent: received / total, eta });
           }
@@ -120,8 +120,8 @@ module.exports = class Updater extends EventEmitter {
 
       new Notification({
         title: 'rush tracker',
-        body:  `mise à jour ${release.tag_name} disponible`,
-        icon:  this.#iconPath
+        body: `mise à jour ${release.tag_name} disponible`,
+        icon: this.#iconPath
       }).show();
 
       this.#logger.log(`mise à jour ${release.tag_name} disponible`);
@@ -132,8 +132,8 @@ module.exports = class Updater extends EventEmitter {
   async install(downloadUrl) {
     try {
       const currentExe = process.env.PORTABLE_EXECUTABLE_FILE || process.execPath;
-      const newExe     = join(tmpdir(), basename(currentExe));
-      const batchPath  = join(tmpdir(), 'update.bat');
+      const newExe = join(tmpdir(), basename(currentExe));
+      const batchPath = join(tmpdir(), 'update.bat');
 
       await this.#download(downloadUrl, newExe);
 
