@@ -63,7 +63,7 @@ export default class History {
   }
 
   #rerender() {
-    if (this.#lastGame === null) return;
+    if (!this.#lastGame) return;
     this.#renderInternal(this.#lastGame, this.#lastGames, this.#lastViewing, false);
   }
 
@@ -117,7 +117,7 @@ export default class History {
 
   #setClass(el, id, viewingGameId) {
     if (id === 'current') {
-      el.className = `card current${viewingGameId === null ? ' selected' : ''}`;
+      el.className = `card current${!viewingGameId ? ' selected' : ''}`;
     } else {
       el.className = `card${viewingGameId === Number(id) ? ' selected' : ''}`;
     }

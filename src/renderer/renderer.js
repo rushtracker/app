@@ -74,7 +74,7 @@ function refresh() {
 
   const { game, self, games } = lastData;
 
-  if (viewingGameId === null) {
+  if (!viewingGameId) {
     players.render(game.players, self, false);
   } else {
     const saved = (games || []).find((g) => g.id === viewingGameId);
@@ -82,7 +82,7 @@ function refresh() {
   }
 
   history.render(game, games || [], viewingGameId);
-  sidebar.setActive(viewingGameId === null);
+  sidebar.setActive(!viewingGameId);
 }
 
 function viewCurrent() {

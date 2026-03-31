@@ -6,8 +6,9 @@ module.exports = class IpcHandler {
   #settings;
   #updater;
   #tray;
+  #getToken;
 
-  constructor(getWindow, handler, sendUpdate, store, sendNotification, settings, updater, tray) {
+  constructor(getWindow, handler, sendUpdate, store, sendNotification, settings, updater, tray, getToken) {
     this.getWindow = getWindow;
     this.handler = handler;
     this.sendUpdate = sendUpdate;
@@ -17,6 +18,7 @@ module.exports = class IpcHandler {
     this.#settings = settings;
     this.#updater = updater;
     this.#tray = tray;
+    this.#getToken = getToken;
 
     this.#register();
 
@@ -27,7 +29,7 @@ module.exports = class IpcHandler {
     const res = await fetch(`https://${process.env.SERVER_HOSTNAME}${process.env.SERVER_API_PATH}?action=player&name=${username}`, {
       signal: AbortSignal.timeout(10000)
     });
-    
+
     return {
       code: res.status,
       data: await res.json()
@@ -38,7 +40,7 @@ module.exports = class IpcHandler {
     const res = await fetch(`https://${process.env.SERVER_HOSTNAME}${process.env.SERVER_API_PATH}?action=players&search=${query}`, {
       signal: AbortSignal.timeout(10000)
     });
-    
+
     return {
       code: res.status,
       data: await res.json()
@@ -49,13 +51,28 @@ module.exports = class IpcHandler {
     const res = await fetch(`https://${process.env.SERVER_HOSTNAME}${process.env.SERVER_API_PATH}?action=server-status`, {
       signal: AbortSignal.timeout(10000)
     });
-    
+
     return {
       code: res.status,
       data: await res.json()
     };
   }
 
+  async #checkUser(username) {
+    const token = this.#getToken();
+    if (!token) return false;
+  
+    const res = await fetch(`http://${process.env.API}/users?username=${encodeURIComponent(username)}`, {
+      headers: { Authorization: `Bearer ${token}` },
+      signal: AbortSignal.timeout(5000)
+    });
+  
+    const data = await res.json();
+  
+    if (!res.ok) return false;
+    return Array.isArray(data) && data.some((u) => u.username?.toLowerCase() === username.toLowerCase());
+  }
+  
   #getPlayerPage(username) {
     return `https://${process.env.SERVER_HOSTNAME}${process.env.SERVER_PLAYER_PATH}${username}`;
   }
@@ -83,6 +100,7 @@ module.exports = class IpcHandler {
 
     ipcMain.handle('player:fetch', (_e, username) => this.#fetchPlayer(username).catch(() => null));
     ipcMain.handle('player:get', (_e, username) => this.#getPlayerPage(username));
+    ipcMain.handle('player:check', (_e, username) => this.#checkUser(username).catch(() => false));
 
     ipcMain.handle('players:fetch', async () => await this.#fetchPlayers());
     ipcMain.handle('players:search', (_e, query) => this.#searchPlayers(query).catch(() => null));
@@ -121,4 +139,4 @@ module.exports = class IpcHandler {
     ipcMain.on('sim:start', () => sim.start());
     ipcMain.on('sim:stop', () => sim.stop());
   }
-}
+};

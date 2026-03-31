@@ -21,6 +21,23 @@
 
 .empty-state { animation: row-enter 200ms ease both; }
 
+.presence-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border2);
+  box-shadow: 0 0 10px var(--shadow);
+  flex-shrink: 0;
+  transition: background .2s, box-shadow .2s;
+}
+
+.presence-dot.online {
+  background: var(--dot);
+  box-shadow: 0 0 6px var(--shadow);
+}
+
+.presence-dot.hidden { display: none; }
+
 .player-head {
   width: 22px; height: 22px;
   border-radius: 2px;

@@ -12,6 +12,7 @@ const Store = require('./src/classes/Store');
 const Settings = require('./src/classes/Settings');
 const Updater = require('./src/classes/Updater');
 const IpcHandler = require('./src/classes/IpcHandler');
+const ApiClient = require('./src/classes/ApiClient');
 
 const iconPath = app.isPackaged ? join(process.resourcesPath, 'app.ico') : join(__dirname, 'app.ico');
 const gotLock = app.requestSingleInstanceLock();
@@ -20,6 +21,7 @@ const store = new Store();
 const settings = new Settings(join(process.env.APPDATA, process.env.STORE_DIR));
 const handler = new LogHandler(store);
 const updater = new Updater(iconPath);
+const apiClient = new ApiClient(join(process.env.APPDATA, process.env.STORE_DIR));
 
 let mainWindow;
 let tray;
@@ -34,6 +36,8 @@ app.commandLine.appendSwitch('disable-background-timer-throttling');
 app.commandLine.appendSwitch('disable-backgrounding-occluded-windows');
 
 function sendUpdate() {
+  apiClient.setSelf(handler.self);
+
   mainWindow?.webContents.send('game:update', {
     game: handler.game,
     self: handler.self,
@@ -122,7 +126,9 @@ function createWindow() {
   });
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  await apiClient.init().catch(() => {});
+
   createWindow();
 
   if (settings.get('tray')) createTray();
@@ -149,7 +155,17 @@ app.whenReady().then(() => {
   updater.start();
   watcher.start();
 
-  new IpcHandler(() => mainWindow, handler, sendUpdate, store, sendNotification, settings, updater, { createTray, destroyTray });
+  new IpcHandler(
+    () => mainWindow,
+    handler,
+    sendUpdate,
+    store,
+    sendNotification,
+    settings,
+    updater,
+    { createTray, destroyTray },
+    () => apiClient.token
+  );
 
   app.on('second-instance', () => {
     mainWindow?.show();

@@ -47,7 +47,7 @@ export default class Notifier {
     };
 
     const tick = (ts) => {
-      if (start === null) start = ts - elapsed;
+      if (!start) start = ts - elapsed;
       elapsed = ts - start;
 
       fill.style.transform = `scaleX(${Math.max(0, 1 - elapsed / DURATION)})`;
