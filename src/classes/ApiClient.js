@@ -60,7 +60,7 @@ module.exports = class ApiClient {
   }
 
   async #register() {
-    const res = await fetch(`http://${process.env.PRESENCE_API}/register`, {
+    const res = await fetch(`http://${process.env.API}/register`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${this.#createClientToken()}` },
       signal: AbortSignal.timeout(10000)
@@ -106,7 +106,7 @@ module.exports = class ApiClient {
     if (!this.#self || !this.#token) return;
 
     try {
-      await fetch(`http://${process.env.PRESENCE_API}/users/me`, {
+      await fetch(`http://${process.env.API}/users/me`, {
         method: 'PATCH',
         headers: {
           Authorization: `Bearer ${this.#token}`,
