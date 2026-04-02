@@ -134,6 +134,15 @@ export default class Players {
     this.#pollIntervals.clear();
   }
 
+  #removePlayer(username, entry) {
+    this.#rows.delete(username);
+    entry.el.remove();
+
+    clearInterval(this.#pollIntervals.get(username));
+    this.#pollIntervals.delete(username);
+    this.#onlineUsers.delete(username);
+  }
+
   render(players, self, isStatic = false, gameId = null) {
     if (isStatic) {
       if (gameId === this.#lastGameId) return;
@@ -183,10 +192,7 @@ export default class Players {
     const incoming = new Set(sorted.map((p) => p.username));
 
     for (const [username, entry] of [...this.#rows]) {
-      if (!incoming.has(username)) {
-        this.#rows.delete(username);
-        entry.el.remove();
-      }
+      if (!incoming.has(username)) this.#removePlayer(username, entry);
     }
 
     sorted.forEach((p, i) => {

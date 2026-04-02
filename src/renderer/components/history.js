@@ -7,6 +7,8 @@ export default class History {
   #filterMode = null;
   #filterResult = null;
   #filterDate = null;
+  #filterCache = null;
+  #filterCacheRef = null;
   #lastGame = null;
   #lastGames = [];
   #lastViewing = null;
@@ -17,49 +19,57 @@ export default class History {
     this.#el.addEventListener('click', (e) => {
       const card = e.target.closest('.card');
       if (!card) return;
-      const id = card.dataset.id;
-      onSelect(id === 'current' ? 'current' : Number(id));
+      onSelect(this.#parseId(card.dataset.id));
     });
 
     this.#el.addEventListener('contextmenu', (e) => {
       const card = e.target.closest('.card');
       if (!card) return;
-      const id = card.dataset.id;
-      onContextMenu(e, id === 'current' ? 'current' : Number(id));
+      onContextMenu(e, this.#parseId(card.dataset.id));
     });
 
     document.getElementById('filter-mode').addEventListener('change', (e) => {
       this.#filterMode = e.target.value || null;
+      this.#filterCache = null;
       this.#rerender();
     });
 
     document.getElementById('filter-result').addEventListener('change', (e) => {
       this.#filterResult = e.target.value || null;
+      this.#filterCache = null;
       this.#rerender();
     });
 
     document.getElementById('filter-date').addEventListener('change', (e) => {
       this.#filterDate = e.target.value || null;
+      this.#filterCache = null;
       this.#rerender();
     });
   }
 
+  #parseId(raw) {
+    return raw === 'current' ? 'current' : Number(raw);
+  }
+
   #filterGames(games) {
-    return games.filter((g) => {
+    if (this.#filterCache && this.#filterCacheRef === games) return this.#filterCache;
+
+    let threshold = 0;
+    if (this.#filterDate === 'today') threshold = startOfToday();
+    else if (this.#filterDate === 'week') threshold = startOfWeekAgo();
+    else if (this.#filterDate === 'month') threshold = startOfMonthAgo();
+
+    const result = games.filter((g) => {
       if (this.#filterMode && g.mode?.name !== this.#filterMode) return false;
       if (this.#filterResult && g.state !== this.#filterResult) return false;
       if (this.#filterResult && g.mode?.name === 'spectator') return false;
-
-      if (this.#filterDate) {
-        const ts = g.id;
-
-        if (this.#filterDate === 'today' && ts < startOfToday()) return false;
-        if (this.#filterDate === 'week' && ts < startOfWeekAgo()) return false;
-        if (this.#filterDate === 'month' && ts < startOfMonthAgo()) return false;
-      }
-
+      if (threshold && g.id < threshold) return false;
       return true;
     });
+
+    this.#filterCache = result;
+    this.#filterCacheRef = games;
+    return result;
   }
 
   #rerender() {
@@ -94,8 +104,8 @@ export default class History {
       resultLabel = labels[g.winner] || '—';
       resultClass = g.winner || 'muted';
     } else {
-      const labels = { win: 'victoire', loose: 'défaite', draw: 'égalité' };
-      const classes = { win: 'green', loose: 'red' };
+      const labels = { win: 'victoire', loss: 'défaite', draw: 'égalité' };
+      const classes = { win: 'green', loss: 'red' };
 
       resultLabel = labels[g.state] || 'inconnu';
       resultClass = classes[g.state] || 'muted';
@@ -119,7 +129,7 @@ export default class History {
     if (id === 'current') {
       el.className = `card current${!viewingGameId ? ' selected' : ''}`;
     } else {
-      el.className = `card${viewingGameId === Number(id) ? ' selected' : ''}`;
+      el.className = `card${viewingGameId === id ? ' selected' : ''}`;
     }
   }
 
@@ -138,7 +148,7 @@ export default class History {
 
     const incoming = new Map();
     if (game.started) incoming.set('current', game);
-    for (const g of filteredGames) incoming.set(String(g.id), g);
+    for (const g of filteredGames) incoming.set(g.id, g);
 
     for (const [id, el] of [...this.#cards]) {
       if (!incoming.has(id)) {
