@@ -4,6 +4,7 @@ export default class Players {
   #el;
   #rows = new Map();
   #lastGameId = null;
+  #isStaticRows = false;
   #currentPlayers = [];
   #onlineUsers = new Set();
   #pollIntervals = new Map();
@@ -122,9 +123,12 @@ export default class Players {
     this.#el.appendChild(el);
   }
 
-  #clear() {
+  #clearRows() {
     this.#el.innerHTML = '';
     this.#rows.clear();
+  }
+
+  #clearPresence() {
     this.#onlineUsers.clear();
     for (const id of this.#pollIntervals.values()) clearInterval(id);
     this.#pollIntervals.clear();
@@ -142,7 +146,8 @@ export default class Players {
       this.#currentPlayers = [];
 
       if (!this.#el.querySelector('.empty-state')) {
-        this.#clear();
+        this.#clearRows();
+        this.#clearPresence();
         this.#showEmpty();
       }
 
@@ -157,7 +162,8 @@ export default class Players {
     this.#el.querySelector('.empty-state')?.remove();
 
     if (isStatic) {
-      this.#clear();
+      this.#clearRows();
+      this.#isStaticRows = true;
 
       sorted.forEach((p, i) => {
         const entry = this.#makeRow(p, self, p.username === bestP?.username, i * 25, false);
@@ -166,6 +172,11 @@ export default class Players {
       });
 
       return;
+    }
+
+    if (this.#isStaticRows) {
+      this.#clearRows();
+      this.#isStaticRows = false;
     }
 
     const isInitial = this.#rows.size === 0;
@@ -202,4 +213,4 @@ export default class Players {
       sorted.forEach((p) => this.#el.appendChild(this.#rows.get(p.username).el));
     }
   }
-};
+}

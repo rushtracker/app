@@ -14,7 +14,7 @@
   transition: background .1s;
 }
 
-.row:hover { background: var(--surface2); }g
+.row:hover { background: var(--surface2); }
 .row.disconnected { opacity: 0.35; }
 
 .row-enter { animation: row-enter 200ms ease both; }
